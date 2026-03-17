@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<link rel="manifest" href="/manifest.json"/>
+<title>ONROAD-APP</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;overscroll-behavior:none;-webkit-font-smoothing:antialiased;}
+input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
+::-webkit-scrollbar{display:none;}
+.screen{display:none;flex-direction:column;min-height:100dvh;min-height:100vh;background:#000;}
+.screen.active{display:flex;}
+.header{background:#111;padding:10px 16px;display:flex;align-items:center;border-bottom:1px solid #222;flex-shrink:0;min-height:54px;}
+.hdr-logo{display:flex;align-items:center;gap:8px;flex:1;}
+.hdr-center{flex:1;text-align:center;}
+.hdr-center .ev{color:#fff;font-size:13px;font-weight:600;}
+.hdr-center .dt{color:#555;font-size:10px;margin-top:1px;}
+.hdr-right{flex:1;display:flex;justify-content:flex-end;}
+.user-badge{display:flex;align-items:center;gap:5px;color:#00b4f0;font-size:11px;cursor:pointer;}
+.user-icon{width:22px;height:22px;border-radius:50%;background:rgba(0,180,240,.2);border:1px solid rgba(0,180,240,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.content{flex:1;padding:14px 12px;overflow-y:auto;}
+.footer{padding:10px 12px 18px;text-align:center;color:#333;font-size:10px;flex-shrink:0;letter-spacing:.2px;}
+.bottom-bar{flex-shrink:0;padding:10px 12px 26px;display:flex;gap:8px;border-top:1px solid #1a1a1a;background:#000;}
+#offline-banner{display:none;background:#5a1010;color:#ff8888;font-size:11px;font-weight:600;text-align:center;padding:7px;flex-shrink:0;}
+#offline-banner.on{display:block;}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(8px);background:#1c1c1c;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;border:1px solid #2a2a2a;white-space:nowrap;z-index:9999;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.btn{flex:1;padding:13px 8px;border-radius:14px;border:none;background:#1e1e1e;color:#fff;font-weight:700;font-size:13px;line-height:1.35;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn.cyan{background:#00b4f0;}
+.btn.danger{background:#8a1a1a;}
+.btn.disabled{background:#111;color:#2a2a2a;cursor:default;pointer-events:none;}
+.card{background:#111;border-radius:16px;overflow:hidden;border:1px solid #1e1e1e;}
+.card-hd{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e1e;}
+.card-hd-title{color:#00b4f0;font-weight:700;font-size:18px;}
+.row{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a1a1a;cursor:pointer;}
+.row:last-child{border-bottom:none;}
+.row:active{background:#1a1a1a;}
+.row.alt{background:#0a0a0a;}
+.row-name{font-size:15px;color:#eee;}
+.row-status{font-size:11px;color:#555;font-weight:600;display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot-g{background:#333;}.dot-a{background:#00b4f0;}.dot-b{background:#1a1a1a;}
+.empty{padding:44px 20px;text-align:center;color:#444;font-size:14px;line-height:1.8;}
+.checkbox-row{margin-top:16px;display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;}
+.chk{width:18px;height:18px;border:1.5px solid #333;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.chk.on{background:#00b4f0;border-color:#00b4f0;}
+.spinner-wrap{display:flex;align-items:center;justify-content:center;padding:36px;}
+.spinner{width:30px;height:30px;border:2px solid #1e1e1e;border-top-color:#00b4f0;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#screen-login{justify-content:space-between;}
+.login-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;gap:0;}
+.login-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px;}
+.login-input{width:100%;padding:15px 18px;border-radius:13px;border:1px solid #1e1e1e;background:#0d0d0d;color:#fff;font-size:16px;}
+.login-input:focus{border-color:#2a2a2a;}
+.login-input::placeholder{color:#333;}
+.login-err{color:#cc4444;font-size:13px;text-align:center;display:none;}
+.login-btn{width:100%;padding:15px;border-radius:13px;background:#00b4f0;color:#fff;font-weight:700;font-size:16px;border:none;cursor:pointer;letter-spacing:.3px;transition:opacity .15s;}
+.login-btn:active{opacity:.8;}
+.tbl-hd{display:grid;grid-template-columns:2fr 1.5fr 60px 92px;padding:9px 14px;gap:4px;border-bottom:1px solid #1a1a1a;background:#080808;}
+.tbl-hd span{color:#00b4f0;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;}
+.tbl-row{display:grid;grid-template-columns:2fr 1.5fr 60px 92px;padding:12px 14px;align-items:center;gap:4px;border-bottom:1px solid #1a1a1a;}
+.tbl-row.alt{background:#080808;}
+.fzg-n{font-size:12px;line-height:1.35;color:#ddd;}
+.fzg-k{font-size:10px;color:#444;margin-top:2px;}
+.tc{font-size:12px;text-align:center;color:#ddd;}
+.tc.empty-val{color:#2a2a2a;}
+.abtn{width:100%;border:none;color:#fff;font-weight:700;font-size:11px;padding:9px 4px;border-radius:10px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;}
+.abtn:active{opacity:.7;}
+.abtn.c{background:#00b4f0;}.abtn.d{background:#8a1a1a;}
+.tbl-foot{padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #1a1a1a;background:#080808;}
+.tbl-foot span{color:#333;font-size:11px;}
+.grp-hdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid #1a1a1a;background:#080808;}
+.grp-title{color:#00b4f0;font-weight:700;font-size:15px;}
+.grp-actions{display:flex;align-items:center;gap:8px;}
+.grp-status{color:#00b4f0;font-size:11px;font-weight:700;padding:4px 10px;border:1px solid #00b4f0;border-radius:8px;letter-spacing:.3px;}
+.start-btn{background:#00b4f0;border:none;color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:10px;cursor:pointer;}
+.refresh-btn{background:#1a1a1a;border:none;color:#444;width:34px;height:34px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.refresh-btn:active{color:#fff;}
+.scan-prompt{color:#00b4f0;font-size:15px;font-weight:500;line-height:1.6;text-align:center;}
+.viewfinder{flex:1;background:#030303;border-radius:18px;border:1.5px solid rgba(0,180,240,.6);position:relative;overflow:hidden;min-height:240px;display:flex;align-items:center;justify-content:center;}
+.corner{position:absolute;width:26px;height:26px;}
+.tl{top:14px;left:14px;border-top:2.5px solid #00b4f0;border-left:2.5px solid #00b4f0;border-radius:4px 0 0 0;}
+.tr{top:14px;right:14px;border-top:2.5px solid #00b4f0;border-right:2.5px solid #00b4f0;border-radius:0 4px 0 0;}
+.bl{bottom:14px;left:14px;border-bottom:2.5px solid #00b4f0;border-left:2.5px solid #00b4f0;border-radius:0 0 0 4px;}
+.br{bottom:14px;right:14px;border-bottom:2.5px solid #00b4f0;border-right:2.5px solid #00b4f0;border-radius:0 0 4px 0;}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,180,240,.9) 30%,#00b4f0 50%,rgba(0,180,240,.9) 70%,transparent);pointer-events:none;}
+.qr-box{width:110px;height:110px;border:1px solid rgba(0,180,240,.2);border-radius:8px;}
+.res-check{width:72px;height:72px;border-radius:50%;background:#0f5a28;display:flex;align-items:center;justify-content:center;}
+.res-card{background:#111;border-radius:14px;padding:16px 20px;width:100%;max-width:340px;border:1px solid #1e1e1e;}
+.res-label{color:#444;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.res-value{color:#eee;font-size:16px;font-weight:600;}
+.res-value.big{font-size:20px;font-weight:700;}
+.res-sub{color:#444;font-size:12px;margin-top:3px;}
+.ev-card{background:#111;border-radius:18px;border:1px solid #1e1e1e;margin-bottom:12px;cursor:pointer;transition:all .18s;overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;}
+.ev-card:active{transform:scale(.975);border-color:#00b4f0;background:#0d1a22;}
+.ev-card.today{border-color:rgba(0,180,240,.4);background:#0a1820;}
+.ev-body{padding:18px 16px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.ev-left{flex:1;min-width:0;}
+.ev-badge{display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;}
+.ev-badge-pill{font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;text-transform:uppercase;}
+.ev-badge-pill.today{background:rgba(0,180,240,.18);color:#00b4f0;border:1px solid rgba(0,180,240,.3);}
+.ev-badge-pill.tomorrow{background:rgba(0,180,240,.08);color:#0090c0;border:1px solid rgba(0,180,240,.15);}
+.ev-badge-pill.soon{background:#1a1a1a;color:#555;border:1px solid #2a2a2a;}
+.ev-name{font-size:16px;font-weight:600;color:#eee;margin-bottom:5px;line-height:1.3;}
+.ev-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ev-date{font-size:12px;color:#555;display:flex;align-items:center;gap:4px;}
+.ev-ort{font-size:12px;color:#444;display:flex;align-items:center;gap:4px;}
+.ev-arrow{color:#222;font-size:22px;flex-shrink:0;transition:color .15s;}
+.ev-card:active .ev-arrow{color:#00b4f0;}
+.ev-divider{height:1px;background:#1a1a1a;margin:0 16px;}
+.ev-footer{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
+.ev-footer-label{font-size:10px;color:#333;text-transform:uppercase;letter-spacing:.4px;}
+.ev-footer-val{font-size:11px;color:#444;}
+.events-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;}
+.events-title{color:#fff;font-size:18px;font-weight:700;}
+.events-subtitle{color:#444;font-size:12px;}
+.events-empty{padding:60px 20px;text-align:center;}
+.events-empty-icon{font-size:40px;margin-bottom:16px;opacity:.3;}
+.events-empty-text{color:#444;font-size:15px;line-height:1.7;}
+.edit-label{color:#444;font-size:10px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:10px;}
+.edit-input{width:100%;padding:13px 14px;border-radius:11px;border:1px solid #1e1e1e;background:#0a0a0a;color:#eee;font-size:15px;}
+.edit-input:focus{border-color:#2a2a2a;}
+.edit-input::placeholder{color:#2a2a2a;}
+.fzg-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #161616;cursor:pointer;}
+.fzg-row:active{opacity:.7;}
+.fzg-chk{width:20px;height:20px;border-radius:5px;border:1.5px solid #2a2a2a;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.fzg-chk.on{background:#00b4f0;border-color:#00b4f0;}
+</style>
+</head>
+<body>
+<div id="offline-banner">⚠ Offline – Aktionen werden bei Verbindung synchronisiert</div>
+<div id="toast"></div>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-body">
+    <svg width="88" height="88" viewBox="0 0 90 90" fill="none" style="margin-bottom:20px;">
+      <circle cx="45" cy="45" r="42" stroke="#fff" stroke-width="1.8"/>
+      <line x1="45" y1="45" x2="45" y2="3" stroke="#fff" stroke-width="1.8"/>
+      <line x1="45" y1="45" x2="81.37" y2="63" stroke="#fff" stroke-width="1.8"/>
+      <line x1="45" y1="45" x2="8.63" y2="63" stroke="#fff" stroke-width="1.8"/>
+    </svg>
+    <div style="color:#ccc;font-size:13px;font-weight:500;letter-spacing:2px;margin-bottom:4px;">Mercedes-Benz</div>
+    <div style="color:#aaa;font-size:11px;letter-spacing:2px;margin-bottom:22px;">Driving Events</div>
+    <div style="color:#00b4f0;font-size:30px;font-weight:800;letter-spacing:6px;margin-bottom:6px;">ONROAD-APP</div>
+    <div style="color:#444;font-size:12px;letter-spacing:.5px;margin-bottom:44px;">Digitales Fahrtenbuch</div>
+    <div class="login-form">
+      <input id="login-user" class="login-input" placeholder="Benutzername" autocomplete="username"/>
+      <input id="login-pass" class="login-input" type="password" placeholder="Passwort" autocomplete="current-password"/>
+      <div id="login-err" class="login-err">Ungültige Zugangsdaten</div>
+      <button class="login-btn" id="login-btn" onclick="doLogin()">Anmelden</button>
+    </div>
+  </div>
+  <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
+</div>
+
+<!-- EVENTS -->
+<div id="screen-events" class="screen">
+  <div class="header">
+    <div class="hdr-logo" id="hdr-ev"></div>
+    <div class="hdr-center"><div class="ev">ONROAD-APP</div></div>
+    <div class="hdr-right"><span class="user-badge" onclick="doLogout()"><div class="user-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="#00b4f0"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div><span id="ev-user"></span></span></div>
+  </div>
+  <div class="content" id="events-content"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+  <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
+</div>
+
+<!-- GRUPPEN -->
+<div id="screen-gruppen" class="screen">
+  <div class="header">
+    <div class="hdr-logo" id="hdr-gr"></div>
+    <div class="hdr-center"><div class="ev" id="gr-ev-n"></div><div class="dt" id="gr-ev-d"></div></div>
+    <div class="hdr-right"><span class="user-badge"><div class="user-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="#00b4f0"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div><span id="gr-user"></span></span></div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-hd"><span class="card-hd-title">Event Gruppen</span><button onclick="openNeueGruppe()" style="background:none;border:none;color:#00b4f0;font-size:26px;cursor:pointer;line-height:1;">⊕</button></div>
+      <div id="gruppen-list"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+    </div>
+    <div class="checkbox-row" onclick="toggleBeendet()">
+      <div id="cb-beendet" class="chk"></div>
+      <span style="color:#444;font-size:14px;">Beendete Gruppen anzeigen</span>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn" onclick="go('screen-events');loadEvents()">Zurück</button>
+    <button class="btn cyan">Übersicht&#10;Teilnehmer</button>
+    <button id="btn-gruppe-verwalten" class="btn disabled">Gruppe&#10;verwalten</button>
+  </div>
+  <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
+</div>
+
+<!-- GRUPPE DETAIL -->
+<div id="screen-gruppe-detail" class="screen">
+  <div class="header">
+    <div class="hdr-logo" id="hdr-gd"></div>
+    <div class="hdr-center"><div class="ev" id="gd-ev-n"></div><div class="dt" id="gd-ev-d"></div></div>
+    <div class="hdr-right"><span class="user-badge"><div class="user-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="#00b4f0"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div><span id="gd-user"></span></span></div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="grp-hdr">
+        <span id="gd-title" class="grp-title"></span>
+        <div class="grp-actions">
+          <span id="gd-status" class="grp-status"></span>
+          <button class="start-btn" onclick="gruppeStarten()">Starten</button>
+          <button class="refresh-btn" onclick="refreshGruppeDetail()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="tbl-hd"><span>Fahrzeug</span><span>Teilnehmer</span><span style="text-align:center">Seit</span><span></span></div>
+      <div id="fzg-list"></div>
+      <div class="tbl-foot">
+        <span>25 pro Seite</span>
+        <span id="pag-info" style="color:#333;font-size:11px;"></span>
+        <span style="color:#222;display:flex;gap:10px;">‹ ›</span>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn" onclick="go('screen-gruppen');loadGruppen()">Zurück</button>
+    <button class="btn cyan" onclick="openBearbeitenGruppe()">Gruppe&#10;bearbeiten</button>
+    <button id="btn-alle" class="btn disabled" onclick="alleAbmelden()">Alle&#10;abmelden</button>
+  </div>
+  <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
+</div>
+
+<!-- SCANNER -->
+<div id="screen-scanner" class="screen">
+  <div class="header">
+    <div class="hdr-logo" id="hdr-sc"></div>
+    <div class="hdr-center"><div class="ev" id="sc-ev-n"></div><div class="dt" id="sc-ev-d"></div></div>
+    <div class="hdr-right"><span class="user-badge"><div class="user-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="#00b4f0"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div><span id="sc-user"></span></span></div>
+  </div>
+  <div class="content" style="display:flex;flex-direction:column;gap:20px;">
+    <p id="scan-prompt" class="scan-prompt"></p>
+    <div class="viewfinder">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="scan-line" id="scan-line" style="top:10%"></div>
+      <div class="qr-box"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button style="padding:15px;border-radius:14px;border:none;background:#0a2e42;color:#00b4f0;font-weight:700;font-size:15px;cursor:pointer;">Kamera wechseln</button>
+      <button onclick="scanAbbrechen()" style="padding:15px;border-radius:14px;border:none;background:#141414;color:#555;font-weight:700;font-size:15px;cursor:pointer;">Scan abbrechen</button>
+    </div>
+  </div>
+  <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
+</div>
+
+<!-- SCAN RESULT -->
+<div id="screen-scan-result" class="screen">
+  <div class="header">
+    <div class="hdr-logo" id="hdr-sr"></div>
+    <div class="hdr-center"><div class="ev" id="sr-ev-n"></div><div class="dt" id="sr-ev-d"></div></div>
+    <div class="hdr-right"><span class="user-badge"><div class="user-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="#00b4f0"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div><span id="sr-user"></span></span></div>
+  </div>
+  <div class="content" style="display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:32px;">
+    <div class="res-check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <span style="color:#00b4f0;font-size:17px;font-weight:600;letter-spacing:.2px;">Teilnehmer erkannt</span>
+    <div class="res-card"><div class="res-label">Name</div><div id="res-name" class="res-value big"></div></div>
+    <div class="res-card"><div class="res-label">Fahrzeug</div><div id="res-fzg" class="res-value"></div><div id="res-kz" class="res-sub"></div></div>
+    <div class="res-card"><div class="res-label">Eincheck-Zeit</div><div id="res-time" class="res-value"></div></div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn" onclick="go('screen-gruppe-detail');refreshGruppeDetail()">Abbrechen</button>
+    <button class="btn cyan" onclick="confirmCheckin()">Probefahrt starten ›</button>
+  </div>
+</div>
+
+<!-- GRUPPE EDIT -->
+<div id="screen-gruppe-edit" class="screen">
+  <div class="header">
+    <div class="hdr-logo" id="hdr-ge"></div>
+    <div class="hdr-center"><div class="ev" id="ge-ev-n"></div><div class="dt" id="ge-ev-d"></div></div>
+    <div class="hdr-right"><span class="user-badge"><div class="user-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="#00b4f0"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div><span id="ge-user"></span></span></div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-hd"><span id="edit-title" class="card-hd-title">Gruppe bearbeiten</span></div>
+      <div style="padding:18px 16px;display:flex;flex-direction:column;gap:20px;">
+        <div>
+          <label class="edit-label">Gruppenname</label>
+          <input id="edit-name" class="edit-input" placeholder="z.B. Instruktor Gruppe 1" oninput="updateSaveBtn()"/>
+        </div>
+        <div>
+          <label class="edit-label" id="edit-fzg-label">Fahrzeuge – 0 ausgewählt</label>
+          <div id="edit-fzg-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn" onclick="editCancel()">Abbrechen</button>
+    <button id="btn-save" class="btn cyan disabled" onclick="saveGruppe()">Speichern</button>
+  </div>
+  <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
+</div>
+
+<script src="/api.js"></script>
+<script>
+const S={aktiveEvent:null,gruppen:[],fahrzeuge:[],aktiveGruppe:null,aktiveFzgId:null,checkins:{},showBeendet:false,scanResult:null,editFzgIds:[],editIsNew:false,scanTimer:null,scanAnim:null,scanPos:10,scanDir:1};
+
+const STAR=`<svg width="30" height="30" viewBox="0 0 90 90" fill="none"><circle cx="45" cy="45" r="42" stroke="#fff" stroke-width="1.8"/><line x1="45" y1="45" x2="45" y2="3" stroke="#fff" stroke-width="1.8"/><line x1="45" y1="45" x2="81.37" y2="63" stroke="#fff" stroke-width="1.8"/><line x1="45" y1="45" x2="8.63" y2="63" stroke="#fff" stroke-width="1.8"/></svg>`;
+const WORDMARK=`<div style="line-height:1.2;"><div style="color:#ddd;font-size:9px;font-weight:600;letter-spacing:1.5px;white-space:nowrap;">Mercedes-Benz</div><div style="color:#00b4f0;font-size:8px;font-weight:600;letter-spacing:1px;white-space:nowrap;">Driving Events</div></div>`;
+const LOGO=`<div style="display:flex;align-items:center;gap:8px;">${STAR}${WORDMARK}</div>`;
+['hdr-ev','hdr-gr','hdr-gd','hdr-sc','hdr-sr','hdr-ge'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=LOGO;});
+
+function fmtTime(ts){return new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
+function fmtDate(d){if(!d)return'';return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function toast(msg,ms=2800){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms);}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);document.getElementById('offline-banner').className=navigator.onLine?'':'on';}
+window.addEventListener('online',()=>document.getElementById('offline-banner').className='');
+window.addEventListener('offline',()=>document.getElementById('offline-banner').className='on');
+
+function setHdr(px){
+  if(!S.aktiveEvent)return;
+  const n=S.aktiveEvent.name, d=`${fmtDate(S.aktiveEvent.datum_von)} – ${fmtDate(S.aktiveEvent.datum_bis)}`;
+  const u=(typeof API!=='undefined'?API.getCurrentUser():'')||sessionStorage.getItem('onroad_user')||'';
+  const ids=[`${px}-ev-n`,`${px}-ev-d`,`${px}-user`];
+  ids.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[n,d,'👤 '+u][i];});
+}
+
+async function doLogin(){
+  const u=document.getElementById('login-user').value.trim(), p=document.getElementById('login-pass').value;
+  if(!u||!p)return;
+  document.getElementById('login-err').style.display='none';
+  const btn=document.getElementById('login-btn');
+  btn.textContent='Anmelden…';btn.style.opacity='.6';
+  try{
+    await API.login(u,p);
+    document.getElementById('ev-user').textContent=u;
+    await loadEvents();go('screen-events');
+  }catch(e){document.getElementById('login-err').style.display='block';}
+  finally{btn.textContent='Anmelden';btn.style.opacity='';}
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+function doLogout(){API.logout();document.getElementById('login-user').value='';document.getElementById('login-pass').value='';go('screen-login');}
+
+function dayLabel(dateStr) {
+  const d    = new Date(dateStr + 'T00:00:00');
+  const now  = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((d - now) / 86400000);
+  if (diff === 0) return { label: 'Heute',    cls: 'today' };
+  if (diff === 1) return { label: 'Morgen',   cls: 'tomorrow' };
+  if (diff <= 7)  return { label: `In ${diff} Tagen`, cls: 'soon' };
+  return { label: `In ${diff} Tagen`, cls: 'soon' };
+}
+
+function fmtDateShort(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('de-DE', {weekday:'short', day:'2-digit', month:'2-digit'});
+}
+
+async function loadEvents(){
+  const cont = document.getElementById('events-content');
+  cont.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+  try {
+    const evts = await API.getEvents();
+    window._events = evts;
+    if (!evts.length) {
+      cont.innerHTML = `<div class="events-empty">
+        <div class="events-empty-icon">📅</div>
+        <div class="events-empty-text">Keine Veranstaltungen in den<br>nächsten 14 Tagen gefunden.</div>
+      </div>`;
+      return;
+    }
+    const header = `<div class="events-header">
+      <span class="events-title">Meine Events</span>
+      <span class="events-subtitle">Nächste 14 Tage · ${evts.length} Veranstaltung${evts.length !== 1 ? 'en' : ''}</span>
+    </div>`;
+    const cards = evts.map(e => {
+      const lbl    = dayLabel(e.datum_von);
+      const isToday = lbl.cls === 'today';
+      const dauer  = e.datum_von !== e.datum_bis
+        ? `${fmtDateShort(e.datum_von)} – ${fmtDateShort(e.datum_bis)}`
+        : fmtDateShort(e.datum_von);
+      const ort    = e.ort ? `<span class="ev-ort"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${e.ort}</span>` : '';
+      return `<div class="ev-card${isToday ? ' today' : ''}" onclick="selectEvent(${e.id})" ontouchstart="">
+        <div class="ev-body">
+          <div class="ev-left">
+            <div class="ev-badge">
+              <span class="ev-badge-pill ${lbl.cls}">${lbl.label}</span>
+            </div>
+            <div class="ev-name">${e.name}</div>
+            <div class="ev-meta">
+              <span class="ev-date">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                ${dauer}
+              </span>
+              ${ort}
+            </div>
+          </div>
+          <div class="ev-arrow">›</div>
+        </div>
+      </div>`;
+    }).join('');
+    cont.innerHTML = header + cards;
+  } catch(err) {
+    cont.innerHTML = `<div class="empty">Verbindungsfehler:<br>${err.message}</div>`;
+  }
+}
+
+async function selectEvent(id){
+  S.aktiveEvent=(window._events||[]).find(e=>e.id===id);
+  if(!S.aktiveEvent)return;
+  await Promise.all([loadFahrzeuge(),loadGruppen()]);
+  setHdr('gr');go('screen-gruppen');
+}
+
+async function loadFahrzeuge(){try{S.fahrzeuge=await API.getFahrzeuge(S.aktiveEvent.id);}catch(e){S.fahrzeuge=[];}}
+
+async function loadGruppen(){
+  if(!S.aktiveEvent)return;
+  setHdr('gr');
+  document.getElementById('gruppen-list').innerHTML='<div class="spinner-wrap"><div class="spinner"></div></div>';
+  try{S.gruppen=await API.getGruppen(S.aktiveEvent.id);renderGruppen();}
+  catch(e){document.getElementById('gruppen-list').innerHTML=`<div class="empty">Fehler: ${e.message}</div>`;}
+}
+
+function renderGruppen(){
+  const vis=S.showBeendet?S.gruppen:S.gruppen.filter(g=>g.status!=='Beendet');
+  const list=document.getElementById('gruppen-list'),btn=document.getElementById('btn-gruppe-verwalten');
+  if(!vis.length){list.innerHTML='<div class="empty">Noch keine Gruppen für diese Veranstaltung definiert.</div>';btn.className='btn disabled';}
+  else{
+    list.innerHTML=vis.map((g,i)=>{
+      const dc=g.status==='Aktiv'?'dot-a':g.status==='Beendet'?'dot-b':'dot-g';
+      return `<div class="row ${i%2===1?'alt':''}" onclick="openGruppe(${g.id})"><span class="row-name">${g.name}</span><span class="row-status"><span class="dot ${dc}"></span>${g.status}</span></div>`;
+    }).join('');
+    btn.className='btn cyan';btn.onclick=()=>{S.aktiveGruppe=vis[0];openBearbeitenGruppe();};
+  }
+  document.getElementById('cb-beendet').className='chk'+(S.showBeendet?' on':'');
+}
+
+function toggleBeendet(){S.showBeendet=!S.showBeendet;renderGruppen();}
+
+async function openGruppe(id){
+  S.aktiveGruppe=S.gruppen.find(g=>g.id===id);if(!S.aktiveGruppe)return;
+  setHdr('gd');go('screen-gruppe-detail');await refreshGruppeDetail();
+}
+
+async function refreshGruppeDetail(){
+  if(!S.aktiveGruppe)return;
+  document.getElementById('gd-title').textContent=`Gruppe "${S.aktiveGruppe.name}"`;
+  const st=S.aktiveGruppe.status||'Geplant';
+  document.getElementById('gd-status').textContent=st;
+  try{
+    const aktive=await API.getAktiveCheckins(S.aktiveGruppe.id);
+    S.checkins={};
+    aktive.forEach(c=>{S.checkins[c.fahrzeug_id]={name:c.teilnehmer_name||`${c.vorname||''} ${c.nachname||''}`.trim()||c.teilnehmer_id,seit:new Date(c.ein).getTime()};});
+  }catch(e){}
+  renderFzgListe();
+}
+
+function renderFzgListe(){
+  const ids=S.aktiveGruppe.fahrzeug_ids||S.aktiveGruppe.fahrzeugIds||[];
+  const list=S.fahrzeuge.filter(f=>ids.includes(f.id));
+  let hat=false;
+  document.getElementById('fzg-list').innerHTML=list.map((f,i)=>{
+    const c=S.checkins[f.id];if(c)hat=true;
+    const ev=c?'':' empty-val';
+    const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
+    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div class="fzg-n">${f.modell||f.name||'—'}</div><div class="fzg-k">${f.kz}</div></div><div class="tc${ev}">${c?c.name:'—'}</div><div class="tc${ev}" style="font-size:11px;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
+  }).join('');
+  document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
+  document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
+}
+
+async function gruppeStarten(){
+  if(!S.aktiveGruppe)return;
+  try{await API.updateGruppe(S.aktiveGruppe.id,{status:'Aktiv'});S.aktiveGruppe.status='Aktiv';S.gruppen=S.gruppen.map(g=>g.id===S.aktiveGruppe.id?{...g,status:'Aktiv'}:g);await refreshGruppeDetail();toast('✓ Gruppe gestartet');}
+  catch(e){toast('Fehler: '+e.message);}
+}
+
+async function fahrerAbmelden(fzgId){
+  try{await API.checkout(fzgId);delete S.checkins[fzgId];renderFzgListe();toast('✓ Fahrer abgemeldet');}
+  catch(e){toast('Fehler: '+e.message);}
+}
+
+async function alleAbmelden(){
+  if(!S.aktiveGruppe)return;
+  try{await API.checkoutAlle(S.aktiveGruppe.id);S.checkins={};renderFzgListe();toast('✓ Alle Fahrer abgemeldet');}
+  catch(e){toast('Fehler: '+e.message);}
+}
+
+function startScan(fzgId){
+  S.aktiveFzgId=fzgId;S.scanResult=null;
+  const fzg=S.fahrzeuge.find(f=>f.id===fzgId);
+  document.getElementById('scan-prompt').textContent=`Um einen Fahrer für "${fzg.modell||fzg.name}" anzumelden, scannen Sie bitte den QR-Code oder halten Sie das NFC-Namensschild ans Gerät.`;
+  setHdr('sc');go('screen-scanner');startScanAnim();
+  clearTimeout(S.scanTimer);
+  S.scanTimer=setTimeout(async()=>{
+    stopScanAnim();
+    const qr='QR-T00'+Math.ceil(Math.random()*6);
+    try{
+      const res=await API.checkinQR(qr,S.aktiveFzgId,S.aktiveGruppe.id);
+      S.scanResult=res.teilnehmer;
+      const tn=res.teilnehmer;
+      S.checkins[S.aktiveFzgId]={name:`${tn.vorname} ${tn.nachname}`,seit:new Date(res.eintrag.ein).getTime()};
+      showScanResult(res.eintrag);
+    }catch(e){toast('Scan fehlgeschlagen');go('screen-gruppe-detail');}
+  },2500);
+}
+
+function startScanAnim(){
+  stopScanAnim();S.scanPos=10;S.scanDir=1;
+  const line=document.getElementById('scan-line');
+  S.scanAnim=setInterval(()=>{S.scanPos+=S.scanDir*1.5;if(S.scanPos>=88)S.scanDir=-1;if(S.scanPos<=12)S.scanDir=1;line.style.top=S.scanPos+'%';},18);
+}
+function stopScanAnim(){if(S.scanAnim){clearInterval(S.scanAnim);S.scanAnim=null;}}
+function scanAbbrechen(){clearTimeout(S.scanTimer);stopScanAnim();go('screen-gruppe-detail');refreshGruppeDetail();}
+
+function showScanResult(eintrag){
+  const fzg=S.fahrzeuge.find(f=>f.id===S.aktiveFzgId),tn=S.scanResult;
+  document.getElementById('res-name').textContent=`${tn.vorname} ${tn.nachname}`;
+  document.getElementById('res-fzg').textContent=fzg.modell||fzg.name;
+  document.getElementById('res-kz').textContent=`Kennzeichen: ${fzg.kz}`;
+  document.getElementById('res-time').textContent=fmtTime(new Date(eintrag.ein).getTime());
+  setHdr('sr');go('screen-scan-result');
+}
+
+function confirmCheckin(){renderFzgListe();go('screen-gruppe-detail');toast('✓ Probefahrt gestartet');}
+
+function openNeueGruppe(){S.editIsNew=true;S.editFzgIds=[];document.getElementById('edit-title').textContent='Neue Gruppe erstellen';document.getElementById('edit-name').value='';setHdr('ge');renderEditFzg();updateSaveBtn();go('screen-gruppe-edit');}
+
+function openBearbeitenGruppe(){
+  if(!S.aktiveGruppe)return;
+  S.editIsNew=false;S.editFzgIds=[...(S.aktiveGruppe.fahrzeug_ids||S.aktiveGruppe.fahrzeugIds||[])];
+  document.getElementById('edit-title').textContent='Gruppe bearbeiten';
+  document.getElementById('edit-name').value=S.aktiveGruppe.name;
+  setHdr('ge');renderEditFzg();updateSaveBtn();go('screen-gruppe-edit');
+}
+
+function renderEditFzg(){
+  document.getElementById('edit-fzg-label').textContent=`Fahrzeuge – ${S.editFzgIds.length} ausgewählt`;
+  document.getElementById('edit-fzg-list').innerHTML=S.fahrzeuge.map(f=>{
+    const on=S.editFzgIds.includes(f.id);
+    const chk=on?`<div class="fzg-chk on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>`:`<div class="fzg-chk"></div>`;
+    return `<div class="fzg-row" onclick="toggleFzg(${f.id})">${chk}<div><div style="color:#ddd;font-size:14px;font-weight:500;">${f.modell||f.name}</div><div style="color:#333;font-size:11px;margin-top:2px;">${f.kz}</div></div></div>`;
+  }).join('');
+}
+
+function toggleFzg(id){const idx=S.editFzgIds.indexOf(id);if(idx>=0)S.editFzgIds.splice(idx,1);else S.editFzgIds.push(id);renderEditFzg();updateSaveBtn();}
+function updateSaveBtn(){const ok=document.getElementById('edit-name').value.trim().length>0&&S.editFzgIds.length>0;document.getElementById('btn-save').className=ok?'btn cyan':'btn cyan disabled';}
+function editCancel(){go(S.editIsNew?'screen-gruppen':'screen-gruppe-detail');}
+
+async function saveGruppe(){
+  const name=document.getElementById('edit-name').value.trim();if(!name||!S.editFzgIds.length)return;
+  const btn=document.getElementById('btn-save');btn.textContent='Speichern…';btn.disabled=true;
+  try{
+    if(S.editIsNew){const g=await API.createGruppe(S.aktiveEvent.id,name,S.editFzgIds);S.gruppen.push(g);renderGruppen();go('screen-gruppen');}
+    else{const upd=await API.updateGruppe(S.aktiveGruppe.id,{name,fahrzeug_ids:S.editFzgIds});Object.assign(S.aktiveGruppe,upd,{name,fahrzeug_ids:S.editFzgIds});await refreshGruppeDetail();go('screen-gruppe-detail');}
+    toast('✓ Gespeichert');
+  }catch(e){toast('Fehler: '+e.message);}
+  finally{btn.textContent='Speichern';btn.disabled=false;updateSaveBtn();}
+}
+</script>
+</body>
+</html>
