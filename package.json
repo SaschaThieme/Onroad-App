@@ -1,0 +1,19 @@
+{
+  "name": "onroad-app",
+  "version": "1.0.0",
+  "description": "Mercedes-Benz Driving Events \u2013 ONROAD-APP",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "echo 'No build step required'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^2.7.0"
+  }
+}
