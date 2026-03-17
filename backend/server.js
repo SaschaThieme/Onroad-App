@@ -18,7 +18,7 @@ const checkinRoute = require('./routes/checkin');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
-const MODE = process.env.API_MODE || 'mock';
+const MODE = process.env.API_MODE || 'mock'; // Railway: Umgebungsvariablen im Dashboard setzen
 
 app.use(cors());
 app.use(express.json());
@@ -30,9 +30,10 @@ app.use('/api/gruppen', gruppenRoute);
 app.use('/api/checkin', checkinRoute);
 
 // ── Frontend statisch ausliefern ──────────────────────────────────────────
-app.use(express.static(path.join(__dirname, '../frontend')));
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // ── Auto-Checkout Job ─────────────────────────────────────────────────────
