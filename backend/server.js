@@ -62,6 +62,12 @@ setInterval(async () => {
 }, 5 * 60 * 1000);
 
 // ── Start ─────────────────────────────────────────────────────────────────
+// DB initialisieren wenn API_MODE=db
+if (process.env.API_MODE === 'db') {
+  const { initDb } = require('./schema');
+  initDb().catch(err => console.error('[SERVER] DB-Init fehlgeschlagen:', err.message));
+}
+
 app.listen(PORT, () => {
   console.log(`\n✅ Onroad Backend läuft auf http://localhost:${PORT}`);
   console.log(`   Modus: ${MODE.toUpperCase()}`);
