@@ -303,7 +303,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 <script>
 const S={aktiveEvent:null,gruppen:[],fahrzeuge:[],aktiveGruppe:null,aktiveFzgId:null,checkins:{},showBeendet:false,scanResult:null,editFzgIds:[],editIsNew:false,scanTimer:null,scanAnim:null,scanPos:10,scanDir:1};
 
-const LOGO=`<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 1527 480"><g transform="translate(-807 -2048)"><text transform="translate(807 2206)" fill="#fff" font-size="158" font-family="MBCorpoATitle,serif" letter-spacing="-0.01em">Mercedes-Benz</text><text transform="translate(807 2461)" fill="#fff" font-size="255" font-family="MBCorpoATitle,serif" letter-spacing="-0.01em">Driving Events</text></g></svg>`;
+const LOGO=`<div style="display:flex;flex-direction:column;justify-content:center;line-height:1.2;"><div style="font-family:'MBCorpoATitle',serif;font-size:11px;font-weight:400;color:#fff;letter-spacing:-.01em;white-space:nowrap;">Mercedes-Benz</div><div style="font-family:'MBCorpoATitle',serif;font-size:11px;font-weight:400;color:#fff;letter-spacing:-.01em;white-space:nowrap;">Driving Events</div></div>`;
 ['hdr-ev','hdr-gr','hdr-gd','hdr-sc','hdr-sr','hdr-ge'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=LOGO;});
 
 function fmtTime(ts){return new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
