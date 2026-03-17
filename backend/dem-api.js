@@ -36,11 +36,11 @@ async function demRequest(method, path, body = null) {
   return res.json();
 }
 
-// ── MOCK-DATEN ────────────────────────────────────────────────────────────
-// Werden verwendet wenn API_MODE=mock gesetzt ist
-// Spiegeln die erwartete DEM-Datenstruktur wider
+// ── TESTDATEN ─────────────────────────────────────────────────────────────
+// ⚠️  NUR FÜR DEMO – werden entfernt sobald DEM Live-API angebunden ist
+// Um auf Live umzuschalten: API_MODE=live in .env (Railway Variables)
+// ─────────────────────────────────────────────────────────────────────────
 
-// Hilfsfunktion: Datum relativ zu heute
 function daysFromNow(n) {
   const d = new Date();
   d.setDate(d.getDate() + n);
@@ -48,16 +48,16 @@ function daysFromNow(n) {
 }
 
 const MOCK = {
-  // Events mit Benutzer-Zuordnung (instruktoren_ids)
-  // datum_von wird dynamisch relativ zu heute gesetzt → Demo funktioniert immer
+
+  // ── VERANSTALTUNGEN ──────────────────────────────────────────────────────
   events: [
     {
       id: 1,
-      name: 'AMG Driving Academy – Stuttgart',
-      datum_von: daysFromNow(0),   // heute
+      name: 'AMG Driving Academy',
+      datum_von: daysFromNow(0),
       datum_bis: daysFromNow(0),
       ende_uhrzeit: '18:00',
-      ort: 'Stuttgart',
+      ort: 'Hockenheimring',
       instruktoren: ['Philipp.explainer', 'Marco.trainer'],
     },
     {
@@ -96,49 +96,81 @@ const MOCK = {
       ort: 'Hamburg',
       instruktoren: ['Philipp.explainer'],
     },
+    // Außerhalb 14-Tage-Fenster → wird nicht angezeigt
     {
       id: 6,
       name: 'C-Klasse Händler-Event',
-      datum_von: daysFromNow(20), // außerhalb 2-Wochen-Fenster → nicht angezeigt
+      datum_von: daysFromNow(20),
       datum_bis: daysFromNow(20),
       ende_uhrzeit: '16:00',
       ort: 'Köln',
       instruktoren: ['Philipp.explainer'],
     },
   ],
+
+  // ── FAHRZEUGE ────────────────────────────────────────────────────────────
   fahrzeuge: [
-    { id: 1, modell: 'A 35 Limousine',                kz: 'WI-ZF 3935' },
-    { id: 2, modell: 'A-Klasse 45 S AMG',             kz: 'WI-VF 9031' },
-    { id: 3, modell: 'AMG GT 43 AMG Coupé',           kz: 'WI-ZF 9049' },
-    { id: 4, modell: 'C 63 S AMG',                    kz: 'WI-MK 7721' },
-    { id: 5, modell: 'E 53 AMG Limousine',            kz: 'WI-TR 4488' },
-    { id: 6, modell: 'GLE 63 S Coupé',               kz: 'WI-GP 2290' },
+    { id: 1,  modell: 'AMG A 45 S 4MATIC+',          kz: 'WI-AMG 100' },
+    { id: 2,  modell: 'AMG C 63 S E PERFORMANCE',    kz: 'WI-AMG 200' },
+    { id: 3,  modell: 'AMG GT 63 S 4MATIC+',         kz: 'WI-AMG 300' },
+    { id: 4,  modell: 'AMG GLE 53 4MATIC+',          kz: 'WI-AMG 400' },
+    { id: 5,  modell: 'AMG SL 63 4MATIC+',           kz: 'WI-AMG 500' },
+    { id: 6,  modell: 'EQS 53 AMG 4MATIC+',          kz: 'WI-EQS 100' },
+    { id: 7,  modell: 'EQE 43 AMG 4MATIC',           kz: 'WI-EQE 200' },
+    { id: 8,  modell: 'Mercedes-AMG GT R Pro',        kz: 'WI-GTR 001' },
+    { id: 9,  modell: 'C 300 4MATIC Limousine',       kz: 'WI-MBZ 010' },
+    { id: 10, modell: 'E 450 4MATIC T-Modell',        kz: 'WI-MBZ 020' },
   ],
+
+  // ── TEILNEHMER (TESTKUNDEN) ───────────────────────────────────────────────
   teilnehmer: [
-    { id: 'T001', vorname: 'Thomas',   nachname: 'Berger',   qr_code: 'QR-T001', nfc_id: 'NFC-T001' },
-    { id: 'T002', vorname: 'Sandra',   nachname: 'Koch',     qr_code: 'QR-T002', nfc_id: 'NFC-T002' },
-    { id: 'T003', vorname: 'Michael',  nachname: 'Hoffmann', qr_code: 'QR-T003', nfc_id: 'NFC-T003' },
-    { id: 'T004', vorname: 'Julia',    nachname: 'Wagner',   qr_code: 'QR-T004', nfc_id: 'NFC-T004' },
-    { id: 'T005', vorname: 'Andreas',  nachname: 'Schäfer',  qr_code: 'QR-T005', nfc_id: 'NFC-T005' },
-    { id: 'T006', vorname: 'Petra',    nachname: 'Neumann',  qr_code: 'QR-T006', nfc_id: 'NFC-T006' },
+    { id: 'T001', vorname: 'Alexander', nachname: 'Becker',     qr_code: 'QR-T001', nfc_id: 'NFC-T001' },
+    { id: 'T002', vorname: 'Sophie',    nachname: 'Wagner',     qr_code: 'QR-T002', nfc_id: 'NFC-T002' },
+    { id: 'T003', vorname: 'Michael',   nachname: 'Hoffmann',   qr_code: 'QR-T003', nfc_id: 'NFC-T003' },
+    { id: 'T004', vorname: 'Laura',     nachname: 'Schneider',  qr_code: 'QR-T004', nfc_id: 'NFC-T004' },
+    { id: 'T005', vorname: 'Thomas',    nachname: 'Müller',     qr_code: 'QR-T005', nfc_id: 'NFC-T005' },
+    { id: 'T006', vorname: 'Julia',     nachname: 'Fischer',    qr_code: 'QR-T006', nfc_id: 'NFC-T006' },
+    { id: 'T007', vorname: 'Stefan',    nachname: 'Weber',      qr_code: 'QR-T007', nfc_id: 'NFC-T007' },
+    { id: 'T008', vorname: 'Anna',      nachname: 'Meyer',      qr_code: 'QR-T008', nfc_id: 'NFC-T008' },
+    { id: 'T009', vorname: 'Christian', nachname: 'Schmidt',    qr_code: 'QR-T009', nfc_id: 'NFC-T009' },
+    { id: 'T010', vorname: 'Katrin',    nachname: 'Braun',      qr_code: 'QR-T010', nfc_id: 'NFC-T010' },
+    { id: 'T011', vorname: 'Markus',    nachname: 'Wolf',       qr_code: 'QR-T011', nfc_id: 'NFC-T011' },
+    { id: 'T012', vorname: 'Sabine',    nachname: 'Richter',    qr_code: 'QR-T012', nfc_id: 'NFC-T012' },
   ],
+
+  // ── GRUPPEN (Testgruppen für Event 1) ────────────────────────────────────
   gruppen: [
-    { id: 1, event_id: 1, name: 'Philipp', instruktor: 'Philipp.explainer', status: 'Geplant', fahrzeug_ids: [1,2,3] },
+    {
+      id: 1,
+      event_id: 1,
+      name: 'Gruppe Philipp',
+      instruktor: 'Philipp.explainer',
+      status: 'Geplant',
+      fahrzeug_ids: [1, 2, 3, 4],
+    },
+    {
+      id: 2,
+      event_id: 1,
+      name: 'Gruppe Marco',
+      instruktor: 'Marco.trainer',
+      status: 'Geplant',
+      fahrzeug_ids: [5, 6, 7, 8],
+    },
   ],
-  checkins: [], // { id, fahrzeug_id, teilnehmer_id, gruppe_id, ein: timestamp, aus: timestamp|null }
+
+  checkins: [],
 };
 
-// ── EVENTS ────────────────────────────────────────────────────────────────
 
 async function getEvents(username = null) {
   if (MODE === 'mock') {
+    // DEMO-MODUS: alle Events der nächsten 14 Tage anzeigen
+    // Im Live-Modus wird nach username gefiltert
     const now  = new Date(); now.setHours(0,0,0,0);
     const in14 = new Date(now); in14.setDate(in14.getDate() + 14);
     return MOCK.events.filter(e => {
-      const von      = new Date(e.datum_von);
-      const inWindow = von >= now && von <= in14;
-      const assigned = !username || (e.instruktoren || []).includes(username);
-      return inWindow && assigned;
+      const von = new Date(e.datum_von);
+      return von >= now && von <= in14;
     });
   }
   // TODO: Endpunkt anpassen wenn DEM-Doku vorliegt
