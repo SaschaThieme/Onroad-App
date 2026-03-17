@@ -143,13 +143,6 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 <!-- LOGIN -->
 <div id="screen-login" class="screen active">
   <div class="login-body">
-    <svg width="80" height="80" viewBox="0 0 90 90" fill="none" style="margin-bottom:16px;">
-      <circle cx="45" cy="45" r="42" stroke="#fff" stroke-width="1.5"/>
-      <line x1="45" y1="45" x2="45" y2="3" stroke="#fff" stroke-width="1.5"/>
-      <line x1="45" y1="45" x2="81.37" y2="63" stroke="#fff" stroke-width="1.5"/>
-      <line x1="45" y1="45" x2="8.63" y2="63" stroke="#fff" stroke-width="1.5"/>
-    </svg>
-    
     <div style="color:#00b4f0;font-size:28px;font-weight:700;letter-spacing:4px;margin-bottom:6px;font-family:'MBCorpoSText',sans-serif;">ONROAD-APP</div>
     <div style="color:#444;font-size:12px;letter-spacing:.5px;margin-bottom:44px;">Digitales Fahrtenbuch</div>
     <div class="login-form">
@@ -310,9 +303,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 <script>
 const S={aktiveEvent:null,gruppen:[],fahrzeuge:[],aktiveGruppe:null,aktiveFzgId:null,checkins:{},showBeendet:false,scanResult:null,editFzgIds:[],editIsNew:false,scanTimer:null,scanAnim:null,scanPos:10,scanDir:1};
 
-const STAR=`<svg width="30" height="30" viewBox="0 0 90 90" fill="none"><circle cx="45" cy="45" r="42" stroke="#fff" stroke-width="1.8"/><line x1="45" y1="45" x2="45" y2="3" stroke="#fff" stroke-width="1.8"/><line x1="45" y1="45" x2="81.37" y2="63" stroke="#fff" stroke-width="1.8"/><line x1="45" y1="45" x2="8.63" y2="63" stroke="#fff" stroke-width="1.8"/></svg>`;
-const WORDMARK=`<svg xmlns="http://www.w3.org/2000/svg" height="26" viewBox="0 0 1527 480"><g transform="translate(-807 -2048)"><text transform="translate(807 2206)" fill="#fff" font-size="158" font-family="MBCorpoATitle,serif" letter-spacing="-0.01em">Mercedes-Benz</text><text transform="translate(807 2461)" fill="#fff" font-size="255" font-family="MBCorpoATitle,serif" letter-spacing="-0.01em">Driving Events</text></g></svg>`;
-const LOGO=`<div style="display:flex;align-items:center;gap:9px;">${STAR}<div style="width:1px;height:26px;background:rgba(255,255,255,.2);flex-shrink:0;"></div>${WORDMARK}</div>`;
+const LOGO=`<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 1527 480"><g transform="translate(-807 -2048)"><text transform="translate(807 2206)" fill="#fff" font-size="158" font-family="MBCorpoATitle,serif" letter-spacing="-0.01em">Mercedes-Benz</text><text transform="translate(807 2461)" fill="#fff" font-size="255" font-family="MBCorpoATitle,serif" letter-spacing="-0.01em">Driving Events</text></g></svg>`;
 ['hdr-ev','hdr-gr','hdr-gd','hdr-sc','hdr-sr','hdr-ge'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=LOGO;});
 
 function fmtTime(ts){return new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
