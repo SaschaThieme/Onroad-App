@@ -62,14 +62,29 @@ setInterval(async () => {
 }, 5 * 60 * 1000);
 
 // ── Start ─────────────────────────────────────────────────────────────────
-// DB initialisieren wenn API_MODE=db
-if (process.env.API_MODE === 'db') {
-  const { initDb } = require('./schema');
-  initDb().catch(err => console.error('[SERVER] DB-Init fehlgeschlagen:', err.message));
-}
+// DB initialisieren wenn API_MODE=db und DATABASE_URL vorhanden
+async function startServer() {
+  if (process.env.API_MODE === 'db') {
+    if (!process.env.DATABASE_URL) {
+      console.warn('[SERVER] API_MODE=db aber DATABASE_URL fehlt → Fallback auf mock');
+      process.env.API_MODE = 'mock';
+    } else {
+      try {
+        const { initDb } = require('./schema');
+        await initDb();
+        console.log('[SERVER] ✓ Datenbank bereit');
+      } catch (err) {
+        console.error('[SERVER] DB-Init fehlgeschlagen → Fallback auf mock:', err.message);
+        process.env.API_MODE = 'mock';
+      }
+    }
+  }
 
-app.listen(PORT, () => {
+  app.listen(PORT, () => {
   console.log(`\n✅ Onroad Backend läuft auf http://localhost:${PORT}`);
   console.log(`   Modus: ${MODE.toUpperCase()}`);
   console.log(`   DEM:   ${process.env.DEM_BASE_URL || '(noch nicht konfiguriert)'}\n`);
-});
+  });
+}
+
+startServer();
