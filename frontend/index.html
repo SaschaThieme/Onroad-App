@@ -319,95 +319,6 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 </div>
 
 <script src="/api.js">
-
-// ── Fahrtenbuch ───────────────────────────────────────────────────────────
-async function openFahrtenbuch() {
-  // Fallback: Event aus aktiver Gruppe holen wenn S.aktiveEvent nicht gesetzt
-  if (!S.aktiveEvent && S.aktiveGruppe) {
-    S.aktiveEvent = (window._events||[]).find(e => e.id === S.aktiveGruppe.event_id) || 
-                    { id: S.aktiveGruppe.event_id, name: 'Veranstaltung', datum_von: '', datum_bis: '' };
-  }
-  const evName = S.aktiveEvent ? S.aktiveEvent.name : 'Fahrtenbuch';
-  const evDt   = S.aktiveEvent ? `${fmtDate(S.aktiveEvent.datum_von)} – ${fmtDate(S.aktiveEvent.datum_bis)}` : '';
-  const u = (typeof API !== 'undefined' ? API.getCurrentUser() : '') || sessionStorage.getItem('onroad_user') || '';
-  document.getElementById('fb-ev-n').textContent = evName;
-  document.getElementById('fb-ev-d').textContent = evDt;
-  document.getElementById('fb-user').textContent = '⬤ ' + u;
-  document.getElementById('hdr-fb').innerHTML = LOGO;
-  go('screen-fahrtenbuch');
-  await loadFahrtenbuch();
-}
-
-async function loadFahrtenbuch() {
-  const cont = document.getElementById('fb-content');
-  const summ = document.getElementById('fb-summary');
-  cont.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
-  summ.innerHTML = '';
-  try {
-    const eventId = S.aktiveEvent ? S.aktiveEvent.id : (S.aktiveGruppe ? S.aktiveGruppe.event_id : 1);
-    const res = await fetch(`/api/events/${eventId}/fahrtenbuch`);
-    const data = await res.json();
-
-    // Summary stats
-    const total   = data.length;
-    const offen   = data.filter(r => !r.aus).length;
-    const personen = [...new Set(data.map(r => r.nachname + r.vorname))].length;
-    summ.innerHTML = `
-      <div class="fb-stat"><div class="fb-stat-val">${total}</div><div class="fb-stat-lbl">Fahrten</div></div>
-      <div class="fb-stat"><div class="fb-stat-val">${personen}</div><div class="fb-stat-lbl">Teilnehmer</div></div>
-      <div class="fb-stat"><div class="fb-stat-val" style="color:${offen>0?'#00b4f0':'#444'}">${offen}</div><div class="fb-stat-lbl">Aktiv</div></div>
-    `;
-
-    if (!data.length) {
-      cont.innerHTML = '<div class="empty">Noch keine Fahrten aufgezeichnet.</div>';
-      return;
-    }
-
-    const rows = data.map(r => {
-      const ein  = r.ein  ? new Date(r.ein).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '–';
-      const aus  = r.aus  ? new Date(r.aus).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '–';
-      const dauer = r.dauer_minuten ? `${Math.round(r.dauer_minuten)} min` : '–';
-      const badge = r.aus
-        ? `<span class="fb-badge abg">✓ Beendet</span>`
-        : `<span class="fb-badge offen">● Aktiv</span>`;
-      return `<tr>
-        <td><strong style="color:#eee">${r.nachname}, ${r.vorname}</strong></td>
-        <td>${r.fahrzeug}<br><span style="color:#444;font-size:10px">${r.kennzeichen}</span></td>
-        <td>${r.gruppe||'–'}</td>
-        <td style="text-align:center">${ein}</td>
-        <td style="text-align:center">${aus}</td>
-        <td style="text-align:center">${dauer}</td>
-        <td>${badge}</td>
-      </tr>`;
-    }).join('');
-
-    cont.innerHTML = `<table class="fb-table">
-      <thead><tr>
-        <th>Teilnehmer</th><th>Fahrzeug</th><th>Gruppe</th>
-        <th style="text-align:center">Ein</th><th style="text-align:center">Aus</th>
-        <th style="text-align:center">Dauer</th><th>Status</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-  } catch(e) {
-    cont.innerHTML = `<div class="empty">Fehler: ${e.message}</div>`;
-  }
-}
-
-function exportFahrtenbuch() {
-  const table = document.querySelector('#fb-content table');
-  if (!table) return;
-  const rows = [...table.querySelectorAll('tr')].map(tr =>
-    [...tr.querySelectorAll('th,td')].map(td => `"${td.textContent.trim().replace(/"/g,'""')}"`).join(';')
-  );
-  const csv = rows.join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `fahrtenbuch_${S.aktiveEvent?.name||'export'}.csv`;
-  a.click(); URL.revokeObjectURL(url);
-}
-
 </script>
 <script>
 // Preload fonts
@@ -676,6 +587,96 @@ async function saveGruppe(){
   }catch(e){toast('Fehler: '+e.message);}
   finally{btn.textContent='Speichern';btn.disabled=false;updateSaveBtn();}
 }
+
+
+// ── Fahrtenbuch ───────────────────────────────────────────────────────────
+async function openFahrtenbuch() {
+  // Fallback: Event aus aktiver Gruppe holen wenn S.aktiveEvent nicht gesetzt
+  if (!S.aktiveEvent && S.aktiveGruppe) {
+    S.aktiveEvent = (window._events||[]).find(e => e.id === S.aktiveGruppe.event_id) || 
+                    { id: S.aktiveGruppe.event_id, name: 'Veranstaltung', datum_von: '', datum_bis: '' };
+  }
+  const evName = S.aktiveEvent ? S.aktiveEvent.name : 'Fahrtenbuch';
+  const evDt   = S.aktiveEvent ? `${fmtDate(S.aktiveEvent.datum_von)} – ${fmtDate(S.aktiveEvent.datum_bis)}` : '';
+  const u = (typeof API !== 'undefined' ? API.getCurrentUser() : '') || sessionStorage.getItem('onroad_user') || '';
+  document.getElementById('fb-ev-n').textContent = evName;
+  document.getElementById('fb-ev-d').textContent = evDt;
+  document.getElementById('fb-user').textContent = '⬤ ' + u;
+  document.getElementById('hdr-fb').innerHTML = LOGO;
+  go('screen-fahrtenbuch');
+  await loadFahrtenbuch();
+}
+
+async function loadFahrtenbuch() {
+  const cont = document.getElementById('fb-content');
+  const summ = document.getElementById('fb-summary');
+  cont.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+  summ.innerHTML = '';
+  try {
+    const eventId = S.aktiveEvent ? S.aktiveEvent.id : (S.aktiveGruppe ? S.aktiveGruppe.event_id : 1);
+    const res = await fetch(`/api/events/${eventId}/fahrtenbuch`);
+    const data = await res.json();
+
+    // Summary stats
+    const total   = data.length;
+    const offen   = data.filter(r => !r.aus).length;
+    const personen = [...new Set(data.map(r => r.nachname + r.vorname))].length;
+    summ.innerHTML = `
+      <div class="fb-stat"><div class="fb-stat-val">${total}</div><div class="fb-stat-lbl">Fahrten</div></div>
+      <div class="fb-stat"><div class="fb-stat-val">${personen}</div><div class="fb-stat-lbl">Teilnehmer</div></div>
+      <div class="fb-stat"><div class="fb-stat-val" style="color:${offen>0?'#00b4f0':'#444'}">${offen}</div><div class="fb-stat-lbl">Aktiv</div></div>
+    `;
+
+    if (!data.length) {
+      cont.innerHTML = '<div class="empty">Noch keine Fahrten aufgezeichnet.</div>';
+      return;
+    }
+
+    const rows = data.map(r => {
+      const ein  = r.ein  ? new Date(r.ein).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '–';
+      const aus  = r.aus  ? new Date(r.aus).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '–';
+      const dauer = r.dauer_minuten ? `${Math.round(r.dauer_minuten)} min` : '–';
+      const badge = r.aus
+        ? `<span class="fb-badge abg">✓ Beendet</span>`
+        : `<span class="fb-badge offen">● Aktiv</span>`;
+      return `<tr>
+        <td><strong style="color:#eee">${r.nachname}, ${r.vorname}</strong></td>
+        <td>${r.fahrzeug}<br><span style="color:#444;font-size:10px">${r.kennzeichen}</span></td>
+        <td>${r.gruppe||'–'}</td>
+        <td style="text-align:center">${ein}</td>
+        <td style="text-align:center">${aus}</td>
+        <td style="text-align:center">${dauer}</td>
+        <td>${badge}</td>
+      </tr>`;
+    }).join('');
+
+    cont.innerHTML = `<table class="fb-table">
+      <thead><tr>
+        <th>Teilnehmer</th><th>Fahrzeug</th><th>Gruppe</th>
+        <th style="text-align:center">Ein</th><th style="text-align:center">Aus</th>
+        <th style="text-align:center">Dauer</th><th>Status</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  } catch(e) {
+    cont.innerHTML = `<div class="empty">Fehler: ${e.message}</div>`;
+  }
+}
+
+function exportFahrtenbuch() {
+  const table = document.querySelector('#fb-content table');
+  if (!table) return;
+  const rows = [...table.querySelectorAll('tr')].map(tr =>
+    [...tr.querySelectorAll('th,td')].map(td => `"${td.textContent.trim().replace(/"/g,'""')}"`).join(';')
+  );
+  const csv = rows.join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `fahrtenbuch_${S.aktiveEvent?.name||'export'}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
 </script>
 
 <!-- FAHRTENBUCH -->
