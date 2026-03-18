@@ -168,7 +168,28 @@ async function getAktiveCheckins(gruppeId) {
   return demRequest('GET',`/api/gruppen/${gruppeId}/checkins/aktiv`);
 }
 async function getFahrtenbuch(eventId) {
-  if (MODE==='mock') return MOCK.checkins;
+  if (MODE==='mock') {
+    // Checkins mit Namen und Fahrzeugdaten anreichern
+    return MOCK.checkins.map(c => {
+      const tn  = MOCK.teilnehmer.find(t => t.id === c.teilnehmer_id) || {};
+      const fzg = MOCK.fahrzeuge.find(f => f.id === c.fahrzeug_id)    || {};
+      const grp = MOCK.gruppen.find(g => g.id === c.gruppe_id)        || {};
+      const dauerMin = c.aus
+        ? Math.round((new Date(c.aus) - new Date(c.ein)) / 60000)
+        : null;
+      return {
+        id:            c.id,
+        vorname:       tn.vorname   || '–',
+        nachname:      tn.nachname  || '–',
+        fahrzeug:      fzg.modell   || '–',
+        kennzeichen:   fzg.kz       || '–',
+        gruppe:        grp.name     || '–',
+        ein:           c.ein,
+        aus:           c.aus,
+        dauer_minuten: dauerMin,
+      };
+    });
+  }
   if (MODE==='db') {
     const {query}=getDb();
     const {rows}=await query(`
