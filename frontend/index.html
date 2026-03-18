@@ -217,9 +217,11 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   <div class="content">
     <div class="card">
       <div class="grp-hdr">
-        <span id="gd-title" class="grp-title"></span>
-        <div class="grp-actions">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="gd-title" class="grp-title"></span>
           <span id="gd-status" class="grp-status"></span>
+        </div>
+        <div class="grp-actions">
           <button class="start-btn" onclick="gruppeStarten()">Starten</button>
           <button class="btn" onclick="openFahrtenbuch()" style="flex:0;padding:8px 12px;font-size:11px;background:#1a2a1a;color:#3a9a3a;border-radius:10px;white-space:nowrap;">📋 Fahrtenbuch</button>
           <button class="refresh-btn" onclick="refreshGruppeDetail()">
@@ -320,11 +322,16 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 
 // ── Fahrtenbuch ───────────────────────────────────────────────────────────
 async function openFahrtenbuch() {
-  if (!S.aktiveEvent) { toast('Bitte zuerst ein Event auswählen'); return; }
-  document.getElementById('fb-ev-n').textContent = S.aktiveEvent.name;
-  const d = `${fmtDate(S.aktiveEvent.datum_von)} – ${fmtDate(S.aktiveEvent.datum_bis)}`;
-  document.getElementById('fb-ev-d').textContent = d;
-  const u = (typeof API !== 'undefined' ? API.getCurrentUser() : '') || '';
+  // Fallback: Event aus aktiver Gruppe holen wenn S.aktiveEvent nicht gesetzt
+  if (!S.aktiveEvent && S.aktiveGruppe) {
+    S.aktiveEvent = (window._events||[]).find(e => e.id === S.aktiveGruppe.event_id) || 
+                    { id: S.aktiveGruppe.event_id, name: 'Veranstaltung', datum_von: '', datum_bis: '' };
+  }
+  const evName = S.aktiveEvent ? S.aktiveEvent.name : 'Fahrtenbuch';
+  const evDt   = S.aktiveEvent ? `${fmtDate(S.aktiveEvent.datum_von)} – ${fmtDate(S.aktiveEvent.datum_bis)}` : '';
+  const u = (typeof API !== 'undefined' ? API.getCurrentUser() : '') || sessionStorage.getItem('onroad_user') || '';
+  document.getElementById('fb-ev-n').textContent = evName;
+  document.getElementById('fb-ev-d').textContent = evDt;
   document.getElementById('fb-user').textContent = '⬤ ' + u;
   document.getElementById('hdr-fb').innerHTML = LOGO;
   go('screen-fahrtenbuch');
@@ -337,7 +344,8 @@ async function loadFahrtenbuch() {
   cont.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
   summ.innerHTML = '';
   try {
-    const res = await fetch(`/api/events/${S.aktiveEvent.id}/fahrtenbuch`);
+    const eventId = S.aktiveEvent ? S.aktiveEvent.id : (S.aktiveGruppe ? S.aktiveGruppe.event_id : 1);
+    const res = await fetch(`/api/events/${eventId}/fahrtenbuch`);
     const data = await res.json();
 
     // Summary stats
@@ -690,7 +698,7 @@ async function saveGruppe(){
     </div>
   </div>
   <div class="bottom-bar">
-    <button class="btn" onclick="go('screen-gruppe-detail')">Zurück</button>
+    <button class="btn" onclick="go('screen-gruppe-detail');refreshGruppeDetail()">Zurück</button>
     <button class="btn cyan" onclick="exportFahrtenbuch()">Export CSV</button>
   </div>
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
