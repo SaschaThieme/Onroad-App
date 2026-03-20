@@ -36,7 +36,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .btn.cyan{background:#00b4f0;}
 .btn.danger{background:#8a1a1a;}
 .btn.disabled{background:#111;color:#2a2a2a;cursor:default;pointer-events:none;}
-.card{background:#111;border-radius:16px;overflow:hidden;border:1px solid #1e1e1e;}
+.card{background:#111;border-radius:16px;overflow:hidden;border:1px solid rgba(0,180,240,.25);box-shadow:0 0 12px rgba(0,180,240,.08),inset 0 0 20px rgba(0,0,0,.3);}
 .card-hd{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e1e;}
 .card-hd-title{color:#00b4f0;font-weight:700;font-size:18px;}
 .row{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a1a1a;cursor:pointer;}
@@ -64,7 +64,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .login-btn{width:100%;padding:15px;border-radius:13px;background:#00b4f0;color:#fff;font-weight:700;font-size:16px;border:none;cursor:pointer;letter-spacing:.3px;transition:opacity .15s;}
 .login-btn:active{opacity:.8;}
 .tbl-hd{display:grid;grid-template-columns:2fr 1.5fr 60px 92px;padding:9px 14px;gap:4px;border-bottom:1px solid #1a1a1a;background:#080808;}
-.tbl-hd span{color:#00b4f0;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;}
+.tbl-hd span{color:#00b4f0;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;text-align:left;}
 .tbl-row{display:grid;grid-template-columns:2fr 1.5fr 60px 92px;padding:12px 14px;align-items:center;gap:4px;border-bottom:1px solid #1a1a1a;}
 .tbl-row.alt{background:#080808;}
 .fzg-n{font-size:12px;line-height:1.35;color:#ddd;}
@@ -93,7 +93,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,180,240,.9) 30%,#00b4f0 50%,rgba(0,180,240,.9) 70%,transparent);pointer-events:none;}
 .qr-box{width:110px;height:110px;border:1px solid rgba(0,180,240,.2);border-radius:8px;}
 .res-check{width:72px;height:72px;border-radius:50%;background:#0f5a28;display:flex;align-items:center;justify-content:center;}
-.res-card{background:#111;border-radius:14px;padding:16px 20px;width:100%;max-width:340px;border:1px solid #1e1e1e;}
+.res-card{background:#111;border-radius:14px;padding:16px 20px;width:100%;max-width:340px;border:1px solid rgba(0,180,240,.25);box-shadow:0 0 10px rgba(0,180,240,.07);}
 .res-label{color:#444;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
 .res-value{color:#eee;font-size:16px;font-weight:600;}
 .res-value.big{font-size:20px;font-weight:700;}
@@ -221,7 +221,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
           </button>
         </div>
       </div>
-      <div class="tbl-hd"><span>Fahrzeug</span><span style="text-align:center;display:block;">Teilnehmer</span><span style="text-align:center;display:block;">Seit</span><span></span></div>
+      <div class="tbl-hd"><span style="text-align:left">Fahrzeug</span><span style="text-align:center;display:block;width:100%;">Teilnehmer</span><span style="text-align:center;display:block;">Seit</span><span></span></div>
       <div id="fzg-list"></div>
       <div class="tbl-foot">
         <span>25 pro Seite</span>
@@ -232,7 +232,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   </div>
   <div class="bottom-bar">
     <button class="btn" onclick="go('screen-gruppen');loadGruppen()">Zurück</button>
-    <button class="btn cyan" onclick="openBearbeitenGruppe()">Gruppe&#10;bearbeiten</button>
+    <button class="btn cyan" onclick="openBearbeitenGruppe()">Fahrzeugauswahl&#10;bearbeiten</button>
     <button id="btn-alle" class="btn disabled" onclick="alleAbmelden()">Alle&#10;abmelden</button>
   </div>
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
@@ -268,7 +268,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
     <div class="hdr-center"><div class="ev" id="sr-ev-n"></div><div class="dt" id="sr-ev-d"></div></div>
     <div class="hdr-right"><span class="user-badge"><span id="sr-user"></span></span></div>
   </div>
-  <div class="content" style="display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:32px;">
+  <div class="content" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:28px;padding-bottom:20px;">
     <div class="res-check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
     <span style="color:#00b4f0;font-size:17px;font-weight:600;letter-spacing:.2px;">Teilnehmer erkannt</span>
     <div class="res-card">
@@ -277,7 +277,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
         <span id="name-edit-toggle" onclick="toggleNameEdit()" style="color:#00b4f0;font-size:11px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;">✎ Korrigieren</span>
       </div>
       <div id="res-name" class="res-value big"></div>
-      <div id="name-edit-area" style="display:none;margin-top:10px;display:none;">
+      <div id="name-edit-area" style="display:none;">
         <div style="display:flex;gap:8px;margin-top:8px;">
           <input id="name-edit-vorname" placeholder="Vorname" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;color:#fff;font-size:14px;font-family:inherit;"/>
           <input id="name-edit-nachname" placeholder="Nachname" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;color:#fff;font-size:14px;font-family:inherit;"/>
@@ -286,11 +286,15 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
       </div>
     </div>
     <div class="res-card"><div class="res-label">Fahrzeug</div><div id="res-fzg" class="res-value"></div><div id="res-kz" class="res-sub"></div></div>
-    <div class="res-card"><div class="res-label">Eincheck-Zeit</div><div id="res-time" class="res-value"></div></div>
-  </div>
-  <div style="padding:0 12px 24px;display:flex;flex-direction:column;gap:10px;">
-    <button class="btn cyan" onclick="confirmCheckin()" style="padding:16px;border-radius:14px;font-size:16px;letter-spacing:.3px;">Probefahrt starten ›</button>
-    <button class="btn" onclick="go('screen-gruppe-detail');refreshGruppeDetail()" style="padding:13px;border-radius:14px;color:#555;">Abbrechen</button>
+    <div class="res-card">
+      <div class="res-label">Eincheck-Zeit</div>
+      <div id="res-time" class="res-value"></div>
+    </div>
+    <!-- Buttons direkt unter Eincheck-Zeit Kachel -->
+    <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+      <button onclick="confirmCheckin()" style="width:100%;padding:17px;border-radius:14px;background:#00b4f0;border:none;color:#fff;font-weight:700;font-size:16px;cursor:pointer;letter-spacing:.3px;box-shadow:0 0 18px rgba(0,180,240,.35);">Probefahrt starten ›</button>
+      <button onclick="go('screen-gruppe-detail');refreshGruppeDetail()" style="width:100%;padding:13px;border-radius:14px;background:#1a1a1a;border:1px solid #2a2a2a;color:#555;font-weight:700;font-size:14px;cursor:pointer;">Abbrechen</button>
+    </div>
   </div>
 </div>
 
@@ -303,7 +307,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   </div>
   <div class="content">
     <div class="card">
-      <div class="card-hd"><span id="edit-title" class="card-hd-title">Gruppe bearbeiten</span></div>
+      <div class="card-hd"><span id="edit-title" class="card-hd-title">Fahrzeugauswahl bearbeiten</span></div>
       <div style="padding:18px 16px;display:flex;flex-direction:column;gap:20px;">
         <div>
           <label class="edit-label">Gruppenname</label>
@@ -634,7 +638,7 @@ function openNeueGruppe(){S.editIsNew=true;S.editFzgIds=[];document.getElementBy
 function openBearbeitenGruppe(){
   if(!S.aktiveGruppe)return;
   S.editIsNew=false;S.editFzgIds=[...(S.aktiveGruppe.fahrzeug_ids||S.aktiveGruppe.fahrzeugIds||[])];
-  document.getElementById('edit-title').textContent='Gruppe bearbeiten';
+  document.getElementById('edit-title').textContent='Fahrzeugauswahl bearbeiten';
   document.getElementById('edit-name').value=S.aktiveGruppe.name;
   setHdr('ge');renderEditFzg();updateSaveBtn();go('screen-gruppe-edit');
 }
