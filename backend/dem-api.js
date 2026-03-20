@@ -27,18 +27,23 @@ function daysFromNow(n) { const d = new Date(); d.setDate(d.getDate()+n); return
 
 const MOCK = {
   events: [
-    { id:1, name:'AMG Driving Academy',          datum_von:daysFromNow(0),  datum_bis:daysFromNow(0),  ende_uhrzeit:'18:00', ort:'Hockenheimring' },
-    { id:2, name:'Mercedes-Benz Experience Day', datum_von:daysFromNow(2),  datum_bis:daysFromNow(3),  ende_uhrzeit:'17:30', ort:'München' },
-    { id:3, name:'EQ Performance Tour',          datum_von:daysFromNow(5),  datum_bis:daysFromNow(5),  ende_uhrzeit:'16:00', ort:'Frankfurt' },
-    { id:4, name:'AMG GT Experience',            datum_von:daysFromNow(8),  datum_bis:daysFromNow(9),  ende_uhrzeit:'19:00', ort:'Berlin' },
-    { id:5, name:'Driving Events Masterclass',   datum_von:daysFromNow(12), datum_bis:daysFromNow(12), ende_uhrzeit:'17:00', ort:'Hamburg' },
+    { id:1, name:'AMG Driving Academy – Hockenheimring', datum_von:daysFromNow(1),  datum_bis:daysFromNow(1),  ende_uhrzeit:'18:00', ort:'Hockenheimring' },
+    { id:2, name:'Mercedes-Benz Experience Day',         datum_von:daysFromNow(3),  datum_bis:daysFromNow(4),  ende_uhrzeit:'17:30', ort:'München' },
+    { id:3, name:'EQ Performance Tour Frankfurt',        datum_von:daysFromNow(6),  datum_bis:daysFromNow(6),  ende_uhrzeit:'16:00', ort:'Frankfurt' },
+    { id:4, name:'AMG GT Experience Berlin',             datum_von:daysFromNow(9),  datum_bis:daysFromNow(10), ende_uhrzeit:'19:00', ort:'Berlin' },
+    { id:5, name:'Driving Events Masterclass Hamburg',   datum_von:daysFromNow(13), datum_bis:daysFromNow(13), ende_uhrzeit:'17:00', ort:'Hamburg' },
   ],
   fahrzeuge: [
-    {id:1,modell:'AMG A 45 S 4MATIC+',kz:'WI-AMG 100'},{id:2,modell:'AMG C 63 S E PERFORMANCE',kz:'WI-AMG 200'},
-    {id:3,modell:'AMG GT 63 S 4MATIC+',kz:'WI-AMG 300'},{id:4,modell:'AMG GLE 53 4MATIC+',kz:'WI-AMG 400'},
-    {id:5,modell:'AMG SL 63 4MATIC+',kz:'WI-AMG 500'},{id:6,modell:'EQS 53 AMG 4MATIC+',kz:'WI-EQS 100'},
-    {id:7,modell:'EQE 43 AMG 4MATIC',kz:'WI-EQE 200'},{id:8,modell:'Mercedes-AMG GT R Pro',kz:'WI-GTR 001'},
-    {id:9,modell:'C 300 4MATIC Limousine',kz:'WI-MBZ 010'},{id:10,modell:'E 450 4MATIC T-Modell',kz:'WI-MBZ 020'},
+    {id:1, modell:'AMG A 45 S 4MATIC+',         kz:'S-MB 1045'},
+    {id:2, modell:'AMG C 63 S E PERFORMANCE',    kz:'S-MB 2063'},
+    {id:3, modell:'AMG GT 63 S 4MATIC+',         kz:'S-MB 3063'},
+    {id:4, modell:'AMG GLE 53 4MATIC+',          kz:'S-MB 4053'},
+    {id:5, modell:'AMG SL 63 4MATIC+',           kz:'S-MB 5063'},
+    {id:6, modell:'EQS 53 AMG 4MATIC+',          kz:'S-MB 6053'},
+    {id:7, modell:'EQE 43 AMG 4MATIC',           kz:'S-MB 7043'},
+    {id:8, modell:'Mercedes-AMG GT R Pro',        kz:'S-MB 8001'},
+    {id:9, modell:'C 300 4MATIC Limousine',       kz:'S-MB 9300'},
+    {id:10,modell:'E 450 4MATIC T-Modell',        kz:'S-MB 450E'},
   ],
   teilnehmer: [
     {id:'T001',vorname:'Alexander',nachname:'Becker',qr_code:'QR-T001',nfc_id:'NFC-T001'},
