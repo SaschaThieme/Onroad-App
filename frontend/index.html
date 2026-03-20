@@ -604,34 +604,36 @@ function setHdr(px){
 }
 
 async function doLogin() {
-  // 1. Benutzernamen holen (falls leer, wird "Gast" genutzt)
+  // 1. Eingabewerte lesen (oder Standard setzen)
   const u = document.getElementById('login-user').value.trim() || "Gast";
   
-  // 2. Fehlermeldungen verstecken
-  document.getElementById('login-err').style.display = 'none';
+  // 2. WICHTIG: Die Variable global definieren, damit keine Fehlermeldung kommt
+  window.currentUser = u; 
   
-  // 3. Optisches Feedback (Button-Animation)
+  // 3. Optisches Feedback
+  document.getElementById('login-err').style.display = 'none';
   const btn = document.getElementById('login-btn');
-  btn.textContent = 'Anmelden…'; 
+  btn.textContent = 'Anmelden…';
   btn.style.opacity = '.6';
 
   try {
-    // 4. WICHTIG: API-Login wird übersprungen/entfernt, 
-    // damit keine Fehlermeldung bei falschen Daten kommt.
+    // 4. Den API-Check überspringen wir komplett
+    // Namen in der UI anzeigen
+    const userDisplays = ['ev-user', 'fv-user', 'gr-user', 'gd-user', 'fb-user'];
+    userDisplays.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = '⬤ ' + u;
+    });
     
-    // Benutzernamen in der App-Oberfläche anzeigen
-    document.getElementById('ev-user').textContent = '⬤ ' + u;
-    
-    // Events laden und zum nächsten Screen springen
+    // 5. App-Daten laden und zum Hauptbildschirm springen
     await loadEvents();
     go('screen-events');
     
   } catch (e) {
-    // Falls beim Laden der Events etwas schiefgeht, zeigen wir einen Fehler
-    document.getElementById('login-err').textContent = "Fehler beim Laden der Daten";
-    document.getElementById('login-err').style.display = 'block';
+    console.error("Fehler beim Starten:", e);
+    // Selbst bei Fehlern (z.B. Offline) lassen wir den User rein
+    go('screen-events');
   } finally {
-    // Button wieder in Normalzustand versetzen
     btn.textContent = 'Anmelden';
     btn.style.opacity = '';
   }
