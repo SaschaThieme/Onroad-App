@@ -194,15 +194,11 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
       <div class="card-hd"><span class="card-hd-title">Event Gruppen</span><button onclick="openNeueGruppe()" style="background:none;border:none;color:#00b4f0;font-size:26px;cursor:pointer;line-height:1;">⊕</button></div>
       <div id="gruppen-list"><div class="spinner-wrap"><div class="spinner"></div></div></div>
     </div>
-    <div class="checkbox-row" onclick="toggleBeendet()">
-      <div id="cb-beendet" class="chk"></div>
-      <span style="color:#444;font-size:14px;">Beendete Gruppen anzeigen</span>
-    </div>
+
   </div>
   <div class="bottom-bar">
     <button class="btn" onclick="go('screen-events');loadEvents()">Zurück</button>
-    <button class="btn cyan">Übersicht&#10;Teilnehmer</button>
-    <button id="btn-gruppe-verwalten" class="btn disabled">Gruppe&#10;verwalten</button>
+    <button id="btn-gruppe-verwalten" class="btn disabled">Übersicht&#10;Fahrzeuge</button>
   </div>
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
 </div>
@@ -222,7 +218,6 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
           <span id="gd-status" class="grp-status"></span>
         </div>
         <div class="grp-actions">
-          <button class="start-btn" onclick="gruppeStarten()">Starten</button>
           <button class="btn" onclick="openFahrtenbuch()" style="flex:0;padding:8px 12px;font-size:11px;background:#1a2a1a;color:#3a9a3a;border-radius:10px;white-space:nowrap;">📋 Fahrtenbuch</button>
           <button class="refresh-btn" onclick="refreshGruppeDetail()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
@@ -279,13 +274,26 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   <div class="content" style="display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:32px;">
     <div class="res-check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
     <span style="color:#00b4f0;font-size:17px;font-weight:600;letter-spacing:.2px;">Teilnehmer erkannt</span>
-    <div class="res-card"><div class="res-label">Name</div><div id="res-name" class="res-value big"></div></div>
+    <div class="res-card">
+      <div class="res-label" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Name</span>
+        <span id="name-edit-toggle" onclick="toggleNameEdit()" style="color:#00b4f0;font-size:11px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;">✎ Korrigieren</span>
+      </div>
+      <div id="res-name" class="res-value big"></div>
+      <div id="name-edit-area" style="display:none;margin-top:10px;display:none;">
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <input id="name-edit-vorname" placeholder="Vorname" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;color:#fff;font-size:14px;font-family:inherit;"/>
+          <input id="name-edit-nachname" placeholder="Nachname" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#0a0a0a;color:#fff;font-size:14px;font-family:inherit;"/>
+        </div>
+        <button onclick="applyNameCorrection()" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;background:#00b4f0;border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">Name übernehmen</button>
+      </div>
+    </div>
     <div class="res-card"><div class="res-label">Fahrzeug</div><div id="res-fzg" class="res-value"></div><div id="res-kz" class="res-sub"></div></div>
     <div class="res-card"><div class="res-label">Eincheck-Zeit</div><div id="res-time" class="res-value"></div></div>
   </div>
-  <div class="bottom-bar">
-    <button class="btn" onclick="go('screen-gruppe-detail');refreshGruppeDetail()">Abbrechen</button>
-    <button class="btn cyan" onclick="confirmCheckin()">Probefahrt starten ›</button>
+  <div style="padding:0 12px 24px;display:flex;flex-direction:column;gap:10px;">
+    <button class="btn cyan" onclick="confirmCheckin()" style="padding:16px;border-radius:14px;font-size:16px;letter-spacing:.3px;">Probefahrt starten ›</button>
+    <button class="btn" onclick="go('screen-gruppe-detail');refreshGruppeDetail()" style="padding:13px;border-radius:14px;color:#555;">Abbrechen</button>
   </div>
 </div>
 
@@ -319,6 +327,34 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 </div>
 
 <script src="/api.js">
+
+function toggleNameEdit() {
+  const area = document.getElementById('name-edit-area');
+  const showing = area.style.display !== 'none';
+  area.style.display = showing ? 'none' : 'block';
+  if (!showing && S.scanResult) {
+    document.getElementById('name-edit-vorname').value  = S.scanResult.vorname  || '';
+    document.getElementById('name-edit-nachname').value = S.scanResult.nachname || '';
+  }
+}
+
+function applyNameCorrection() {
+  const vn = document.getElementById('name-edit-vorname').value.trim();
+  const nn = document.getElementById('name-edit-nachname').value.trim();
+  if (!vn || !nn) return;
+  if (S.scanResult) {
+    S.scanResult.vorname  = vn;
+    S.scanResult.nachname = nn;
+  }
+  document.getElementById('res-name').textContent = `${vn} ${nn}`;
+  // Update local checkin name
+  if (S.aktiveFzgId && S.checkins[S.aktiveFzgId]) {
+    S.checkins[S.aktiveFzgId].name = `${vn} ${nn}`;
+  }
+  document.getElementById('name-edit-area').style.display = 'none';
+  toast('✓ Name korrigiert');
+}
+
 </script>
 <script>
 // Preload fonts
@@ -485,7 +521,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div class="fzg-n">${f.modell||f.name||'—'}</div><div class="fzg-k">${f.kz}</div></div><div class="tc${ev}">${c?c.name:'—'}</div><div class="tc${ev}" style="font-size:11px;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
+    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div class="fzg-n">${f.kz}</div><div class="fzg-n">${f.modell||f.name||'—'}</div></div><div class="tc${ev}">${c?c.name:'—'}</div><div class="tc${ev}" style="font-size:11px;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
@@ -569,7 +605,7 @@ function renderEditFzg(){
   document.getElementById('edit-fzg-list').innerHTML=S.fahrzeuge.map(f=>{
     const on=S.editFzgIds.includes(f.id);
     const chk=on?`<div class="fzg-chk on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>`:`<div class="fzg-chk"></div>`;
-    return `<div class="fzg-row" onclick="toggleFzg(${f.id})">${chk}<div><div style="color:#ddd;font-size:14px;font-weight:500;">${f.modell||f.name}</div><div style="color:#333;font-size:11px;margin-top:2px;">${f.kz}</div></div></div>`;
+    return `<div class="fzg-row" onclick="toggleFzg(${f.id})">${chk}<div><div style="color:#ddd;font-size:14px;">${f.kz}</div><div style="color:#ddd;font-size:14px;font-weight:500;">${f.modell||f.name}</div></div></div>`;
   }).join('');
 }
 
