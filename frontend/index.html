@@ -28,7 +28,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 
 .content{flex:1;padding:14px 12px;overflow-y:auto;}
 .footer{padding:10px 12px 18px;text-align:center;color:#333;font-size:10px;flex-shrink:0;letter-spacing:.2px;}
-.bottom-bar{flex-shrink:0;padding:10px 12px 26px;display:flex;gap:8px;border-top:1px solid #1a1a1a;background:#000;}
+.bottom-bar{flex-shrink:0;padding:10px 12px 26px;display:flex;gap:8px;border-top:1px solid #1a1a1a;background:#000;justify-content:center;}
 #offline-banner{display:none;background:#5a1010;color:#ff8888;font-size:11px;font-weight:600;text-align:center;padding:7px;flex-shrink:0;}
 #offline-banner.on{display:block;}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(8px);background:#1c1c1c;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;border:1px solid #2a2a2a;white-space:nowrap;z-index:9999;}
@@ -71,7 +71,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .tbl-row.alt{background:#080808;}
 .fzg-n{font-size:12px;line-height:1.35;color:#ddd;}
 .fzg-k{font-size:10px;color:#444;margin-top:2px;}
-.tc{font-size:12px;text-align:center;color:#ddd;}
+.tc{font-size:12px;text-align:center;color:#ddd;display:block;width:100%;}
 .tc.empty-val{color:#2a2a2a;}
 .abtn{width:100%;border:none;color:#fff;font-weight:700;font-size:11px;padding:9px 4px;border-radius:10px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;}
 .abtn:active{opacity:.7;}
@@ -198,7 +198,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   </div>
   <div class="bottom-bar">
     <button class="btn" onclick="go('screen-events');loadEvents()">Zurück</button>
-    <button id="btn-gruppe-verwalten" class="btn disabled">Übersicht&#10;Fahrzeuge</button>
+    <button id="btn-gruppe-verwalten" class="btn disabled" onclick="">Übersicht&#10;Fahrzeuge</button>
   </div>
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
 </div>
@@ -223,7 +223,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
           </button>
         </div>
       </div>
-      <div class="tbl-hd"><span>Fahrzeug</span><span style="text-align:center">Teilnehmer</span><span style="text-align:center">Seit</span><span></span></div>
+      <div class="tbl-hd"><span>Fahrzeug</span><span style="text-align:center;display:block;">Teilnehmer</span><span style="text-align:center;display:block;">Seit</span><span></span></div>
       <div id="fzg-list"></div>
       <div class="tbl-foot">
         <span>25 pro Seite</span>
@@ -354,6 +354,53 @@ function applyNameCorrection() {
   toast('✓ Name korrigiert');
 }
 
+
+// ── Fahrzeugübersicht ─────────────────────────────────────────────────────
+async function openFahrzeugUebersicht() {
+  if (!S.aktiveEvent) return;
+  const u = (typeof API !== 'undefined' ? API.getCurrentUser() : '') || sessionStorage.getItem('onroad_user') || '';
+  document.getElementById('fv-ev-n').textContent = S.aktiveEvent.name;
+  document.getElementById('fv-ev-d').textContent = `${fmtDate(S.aktiveEvent.datum_von)} – ${fmtDate(S.aktiveEvent.datum_bis)}`;
+  document.getElementById('fv-user').textContent = '⬤ ' + u;
+  document.getElementById('hdr-fv').innerHTML = LOGO;
+
+  // Ermittle welche Fahrzeuge bereits einer aktiven Gruppe zugeordnet sind
+  const belegtIds = new Set();
+  // Nur aktive Gruppen als belegt zeigen
+  S.gruppen.filter(g => g.status === 'Aktiv').forEach(g => {
+    (g.fahrzeug_ids || g.fahrzeugIds || []).forEach(id => belegtIds.add(id));
+  });
+
+  const list = document.getElementById('fv-list');
+  const count = document.getElementById('fv-count');
+  count.textContent = `${S.fahrzeuge.length} Fahrzeuge`;
+
+  list.innerHTML = S.fahrzeuge.map((f, i) => {
+    const belegt = belegtIds.has(f.id);
+    const gruppe = S.gruppen.find(g =>
+      g.status === 'Aktiv' && (g.fahrzeug_ids||g.fahrzeugIds||[]).includes(f.id)
+    );
+    const statusBadge = belegt
+      ? `<span style="font-size:10px;color:#00b4f0;background:rgba(0,180,240,.1);border:1px solid rgba(0,180,240,.2);padding:2px 8px;border-radius:8px;white-space:nowrap;">${gruppe ? gruppe.name : 'Belegt'}</span>`
+      : `<span style="font-size:10px;color:#444;background:#111;border:1px solid #222;padding:2px 8px;border-radius:8px;">Frei</span>`;
+    return `<div class="row ${i%2===1?'alt':''}" style="cursor:default;">
+      <div>
+        <div style="font-size:11px;color:#aaa;">${f.kz}</div>
+        <div style="font-size:13px;color:#ddd;font-weight:500;">${f.modell}</div>
+      </div>
+      ${statusBadge}
+    </div>`;
+  }).join('');
+
+  go('screen-fahrzeuge');
+}
+
+function openNeueGruppeVonFahrzeuge() {
+  // Zurück zu Gruppen-Screen und Neue Gruppe öffnen
+  go('screen-gruppen');
+  setTimeout(() => openNeueGruppe(), 50);
+}
+
 </script>
 <script>
 // Preload fonts
@@ -363,7 +410,7 @@ document.fonts.ready.then(()=>{
 const S={aktiveEvent:null,gruppen:[],fahrzeuge:[],aktiveGruppe:null,aktiveFzgId:null,checkins:{},showBeendet:false,scanResult:null,editFzgIds:[],editIsNew:false,scanTimer:null,scanAnim:null,scanPos:10,scanDir:1};
 
 const LOGO=`<div style="display:flex;flex-direction:column;justify-content:center;line-height:1.2;"><div style="font-family:'MBCorpoATitle',serif;font-size:11px;font-weight:400;color:#fff;letter-spacing:-.01em;white-space:nowrap;">Mercedes-Benz</div><div style="font-family:'MBCorpoATitle',serif;font-size:11px;font-weight:400;color:#fff;letter-spacing:-.01em;white-space:nowrap;">Driving Events</div></div>`;
-['hdr-ev','hdr-gr','hdr-gd','hdr-sc','hdr-sr','hdr-ge','hdr-fb'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=LOGO;});
+['hdr-ev','hdr-gr','hdr-gd','hdr-sc','hdr-sr','hdr-ge','hdr-fb','hdr-fv'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=LOGO;});
 
 function fmtTime(ts){return new Date(ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
 function fmtDate(d){if(!d)return'';return new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});}
@@ -519,7 +566,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div class="fzg-n">${f.kz}</div><div class="fzg-n">${f.modell||f.name||'—'}</div></div><div class="tc${ev}">${c?c.name:'—'}</div><div class="tc${ev}" style="font-size:11px;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
+    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div style="font-size:11px;color:#aaa;margin-bottom:1px;">${f.kz}</div><div class="fzg-n">${f.modell||f.name||'—'}</div></div><div class="tc${ev}">${c?c.name:'—'}</div><div class="tc${ev}" style="font-size:11px;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
@@ -609,6 +656,21 @@ function editCancel(){go(S.editIsNew?'screen-gruppen':'screen-gruppe-detail');}
 
 async function saveGruppe(){
   const name=document.getElementById('edit-name').value.trim();if(!name||!S.editFzgIds.length)return;
+
+  // Prüfen ob Fahrzeuge bereits in ANDEREN aktiven Gruppen belegt sind
+  // Nur blockieren wenn das Fahrzeug gerade in einer AKTIVEN Gruppe ist (zeitgleiche Nutzung)
+  const konflikt = S.gruppen.filter(g => {
+    if (g.status !== 'Aktiv') return false; // Geplant/Beendet = kein Konflikt
+    if (!S.editIsNew && g.id === S.aktiveGruppe?.id) return false;
+    const gIds = g.fahrzeug_ids || g.fahrzeugIds || [];
+    return S.editFzgIds.some(id => gIds.includes(id));
+  });
+  if (konflikt.length > 0) {
+    const namen = konflikt.map(g=>g.name).join(', ');
+    toast(`⚠ Fahrzeug bereits in: ${namen}`);
+    return;
+  }
+
   const btn=document.getElementById('btn-save');btn.textContent='Speichern…';btn.disabled=true;
   try{
     if(S.editIsNew){const g=await API.createGruppe(S.aktiveEvent.id,name,S.editFzgIds);S.gruppen.push(g);renderGruppen();go('screen-gruppen');}
@@ -671,7 +733,7 @@ async function loadFahrtenbuch() {
         : `<span class="fb-badge offen">● Aktiv</span>`;
       return `<tr>
         <td><strong style="color:#eee">${r.nachname}, ${r.vorname}</strong></td>
-        <td>${r.fahrzeug}<br><span style="color:#444;font-size:10px">${r.kennzeichen}</span></td>
+        <td><span style="font-size:11px;color:#aaa;display:block;">${r.kennzeichen}</span>${r.fahrzeug}</td>
         <td>${r.gruppe||'–'}</td>
         <td style="text-align:center">${ein}</td>
         <td style="text-align:center">${aus}</td>
@@ -731,6 +793,30 @@ function exportFahrtenbuch() {
   <div class="bottom-bar">
     <button class="btn" onclick="go('screen-gruppe-detail');refreshGruppeDetail()">Zurück</button>
     <button class="btn cyan" onclick="exportFahrtenbuch()">Export CSV</button>
+  </div>
+  <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
+</div>
+
+
+<!-- FAHRZEUG ÜBERSICHT -->
+<div id="screen-fahrzeuge" class="screen">
+  <div class="header">
+    <div class="hdr-logo" id="hdr-fv"></div>
+    <div class="hdr-center"><div class="ev" id="fv-ev-n"></div><div class="dt" id="fv-ev-d"></div></div>
+    <div class="hdr-right"><span class="user-badge"><span id="fv-user"></span></span></div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-hd-title">Fahrzeuge</span>
+        <span style="color:#555;font-size:12px;" id="fv-count"></span>
+      </div>
+      <div id="fv-list"></div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn" onclick="go('screen-gruppen')">Zurück</button>
+    <button class="btn cyan" onclick="openNeueGruppeVonFahrzeuge()">+ Neue Gruppe</button>
   </div>
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
 </div>
