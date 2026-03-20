@@ -63,13 +63,13 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .login-err{color:#cc4444;font-size:13px;text-align:center;display:none;}
 .login-btn{width:100%;padding:15px;border-radius:13px;background:#00b4f0;color:#fff;font-weight:700;font-size:16px;border:none;cursor:pointer;letter-spacing:.3px;transition:opacity .15s;}
 .login-btn:active{opacity:.8;}
-.tbl-hd{display:grid;grid-template-columns:2fr 1.5fr 56px 90px;padding:9px 14px;gap:6px;border-bottom:1px solid rgba(0,180,240,.15);background:#080808;}
+.tbl-hd{display:grid;grid-template-columns:2fr 1fr 56px 90px;padding:9px 14px;gap:6px;border-bottom:1px solid rgba(0,180,240,.15);background:#080808;align-items:center;}
 .tbl-hd span{color:#00b4f0;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
-.tbl-row{display:grid;grid-template-columns:2fr 1.5fr 56px 90px;padding:14px 14px;align-items:center;gap:6px;border-bottom:1px solid rgba(0,180,240,.08);}
+.tbl-row{display:grid;grid-template-columns:2fr 1fr 56px 90px;padding:14px 14px;align-items:center;gap:6px;border-bottom:1px solid rgba(0,180,240,.08);}
 .tbl-row.alt{background:rgba(0,180,240,.03);}
 .fzg-n{font-size:14px;line-height:1.35;color:#ddd;}
 .fzg-k{font-size:12px;color:#555;margin-top:2px;}
-.tc{font-size:13px;color:#ddd;display:flex;align-items:center;justify-content:center;}
+.tc{font-size:13px;color:#ddd;text-align:center;justify-self:center;width:100%;}
 .tc.empty-val{color:#2a2a2a;}
 .abtn{width:100%;border:none;color:#fff;font-weight:700;font-size:13px;padding:12px 4px;border-radius:12px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;}
 .abtn:active{opacity:.7;}
@@ -327,83 +327,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
 </div>
 
-<script src="/api.js">
-
-function toggleNameEdit() {
-  const area = document.getElementById('name-edit-area');
-  const showing = area.style.display !== 'none';
-  area.style.display = showing ? 'none' : 'block';
-  if (!showing && S.scanResult) {
-    document.getElementById('name-edit-vorname').value  = S.scanResult.vorname  || '';
-    document.getElementById('name-edit-nachname').value = S.scanResult.nachname || '';
-  }
-}
-
-function applyNameCorrection() {
-  const vn = document.getElementById('name-edit-vorname').value.trim();
-  const nn = document.getElementById('name-edit-nachname').value.trim();
-  if (!vn || !nn) return;
-  if (S.scanResult) {
-    S.scanResult.vorname  = vn;
-    S.scanResult.nachname = nn;
-  }
-  document.getElementById('res-name').textContent = `${vn} ${nn}`;
-  // Update local checkin name
-  if (S.aktiveFzgId && S.checkins[S.aktiveFzgId]) {
-    S.checkins[S.aktiveFzgId].name = `${vn} ${nn}`;
-  }
-  document.getElementById('name-edit-area').style.display = 'none';
-  toast('✓ Name korrigiert');
-}
-
-
-// ── Fahrzeugübersicht ─────────────────────────────────────────────────────
-async function openFahrzeugUebersicht() {
-  if (!S.aktiveEvent) return;
-  const u = (typeof API !== 'undefined' ? API.getCurrentUser() : '') || sessionStorage.getItem('onroad_user') || '';
-  document.getElementById('fv-ev-n').textContent = S.aktiveEvent.name;
-  document.getElementById('fv-ev-d').textContent = `${fmtDate(S.aktiveEvent.datum_von)} – ${fmtDate(S.aktiveEvent.datum_bis)}`;
-  document.getElementById('fv-user').textContent = '⬤ ' + u;
-  document.getElementById('hdr-fv').innerHTML = LOGO;
-
-  // Ermittle welche Fahrzeuge bereits einer aktiven Gruppe zugeordnet sind
-  const belegtIds = new Set();
-  // Nur aktive Gruppen als belegt zeigen
-  S.gruppen.filter(g => g.status === 'Aktiv').forEach(g => {
-    (g.fahrzeug_ids || g.fahrzeugIds || []).forEach(id => belegtIds.add(id));
-  });
-
-  const list = document.getElementById('fv-list');
-  const count = document.getElementById('fv-count');
-  count.textContent = `${S.fahrzeuge.length} Fahrzeuge`;
-
-  list.innerHTML = S.fahrzeuge.map((f, i) => {
-    const belegt = belegtIds.has(f.id);
-    const gruppe = S.gruppen.find(g =>
-      g.status === 'Aktiv' && (g.fahrzeug_ids||g.fahrzeugIds||[]).includes(f.id)
-    );
-    const statusBadge = belegt
-      ? `<span style="font-size:10px;color:#00b4f0;background:rgba(0,180,240,.1);border:1px solid rgba(0,180,240,.2);padding:2px 8px;border-radius:8px;white-space:nowrap;">${gruppe ? gruppe.name : 'Belegt'}</span>`
-      : `<span style="font-size:10px;color:#444;background:#111;border:1px solid #222;padding:2px 8px;border-radius:8px;">Frei</span>`;
-    return `<div class="row ${i%2===1?'alt':''}" style="cursor:default;">
-      <div>
-        <div style="font-size:11px;color:#aaa;">${f.kz}</div>
-        <div style="font-size:13px;color:#ddd;font-weight:500;">${f.modell}</div>
-      </div>
-      ${statusBadge}
-    </div>`;
-  }).join('');
-
-  go('screen-fahrzeuge');
-}
-
-function openNeueGruppeVonFahrzeuge() {
-  // Zurück zu Gruppen-Screen und Neue Gruppe öffnen
-  go('screen-gruppen');
-  setTimeout(() => openNeueGruppe(), 50);
-}
-
-</script>
+<script src="/api.js"></script>
 <script>
 // Preload fonts
 document.fonts.ready.then(()=>{
@@ -568,7 +492,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:1px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></div><div class="tc${ev}">${c?c.name:'—'}</div><div class="tc${ev}" style="font-size:11px;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
+    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:1px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></div><div style="text-align:center;font-size:13px;color:${c?'#ddd':'#333'};width:100%;">${c?c.name:'—'}</div><div style="text-align:center;font-size:12px;color:${c?'#888':'#333'};width:100%;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
@@ -735,7 +659,8 @@ async function loadFahrtenbuch() {
         : `<span class="fb-badge offen">● Aktiv</span>`;
       return `<tr>
         <td><strong style="color:#eee">${r.nachname}, ${r.vorname}</strong></td>
-        <td><span style="font-size:11px;color:#aaa;display:block;">${r.kennzeichen}</span>${r.fahrzeug}</td>
+        <td style="font-weight:600;">${r.kennzeichen}</td>
+        <td style="color:#aaa;">${r.fahrzeug}</td>
         <td>${r.gruppe||'–'}</td>
         <td style="text-align:center">${ein}</td>
         <td style="text-align:center">${aus}</td>
@@ -746,7 +671,7 @@ async function loadFahrtenbuch() {
 
     cont.innerHTML = `<table class="fb-table">
       <thead><tr>
-        <th>Teilnehmer</th><th>Fahrzeug</th><th>Gruppe</th>
+        <th>Teilnehmer</th><th>Kennzeichen</th><th>Fahrzeug</th><th>Gruppe</th>
         <th style="text-align:center">Ein</th><th style="text-align:center">Aus</th>
         <th style="text-align:center">Dauer</th><th>Status</th>
       </tr></thead>
@@ -770,6 +695,84 @@ function exportFahrtenbuch() {
   a.href = url; a.download = `fahrtenbuch_${S.aktiveEvent?.name||'export'}.csv`;
   a.click(); URL.revokeObjectURL(url);
 }
+
+
+
+
+function toggleNameEdit() {
+  const area = document.getElementById('name-edit-area');
+  const showing = area.style.display !== 'none';
+  area.style.display = showing ? 'none' : 'block';
+  if (!showing && S.scanResult) {
+    document.getElementById('name-edit-vorname').value  = S.scanResult.vorname  || '';
+    document.getElementById('name-edit-nachname').value = S.scanResult.nachname || '';
+  }
+}
+
+function applyNameCorrection() {
+  const vn = document.getElementById('name-edit-vorname').value.trim();
+  const nn = document.getElementById('name-edit-nachname').value.trim();
+  if (!vn || !nn) return;
+  if (S.scanResult) {
+    S.scanResult.vorname  = vn;
+    S.scanResult.nachname = nn;
+  }
+  document.getElementById('res-name').textContent = `${vn} ${nn}`;
+  // Update local checkin name
+  if (S.aktiveFzgId && S.checkins[S.aktiveFzgId]) {
+    S.checkins[S.aktiveFzgId].name = `${vn} ${nn}`;
+  }
+  document.getElementById('name-edit-area').style.display = 'none';
+  toast('✓ Name korrigiert');
+}
+
+
+// ── Fahrzeugübersicht ─────────────────────────────────────────────────────
+async function openFahrzeugUebersicht() {
+  if (!S.aktiveEvent) return;
+  const u = (typeof API !== 'undefined' ? API.getCurrentUser() : '') || sessionStorage.getItem('onroad_user') || '';
+  document.getElementById('fv-ev-n').textContent = S.aktiveEvent.name;
+  document.getElementById('fv-ev-d').textContent = `${fmtDate(S.aktiveEvent.datum_von)} – ${fmtDate(S.aktiveEvent.datum_bis)}`;
+  document.getElementById('fv-user').textContent = '⬤ ' + u;
+  document.getElementById('hdr-fv').innerHTML = LOGO;
+
+  // Ermittle welche Fahrzeuge bereits einer aktiven Gruppe zugeordnet sind
+  const belegtIds = new Set();
+  // Nur aktive Gruppen als belegt zeigen
+  S.gruppen.filter(g => g.status === 'Aktiv').forEach(g => {
+    (g.fahrzeug_ids || g.fahrzeugIds || []).forEach(id => belegtIds.add(id));
+  });
+
+  const list = document.getElementById('fv-list');
+  const count = document.getElementById('fv-count');
+  count.textContent = `${S.fahrzeuge.length} Fahrzeuge`;
+
+  list.innerHTML = S.fahrzeuge.map((f, i) => {
+    const belegt = belegtIds.has(f.id);
+    const gruppe = S.gruppen.find(g =>
+      g.status === 'Aktiv' && (g.fahrzeug_ids||g.fahrzeugIds||[]).includes(f.id)
+    );
+    const statusBadge = belegt
+      ? `<span style="font-size:10px;color:#00b4f0;background:rgba(0,180,240,.1);border:1px solid rgba(0,180,240,.2);padding:2px 8px;border-radius:8px;white-space:nowrap;">${gruppe ? gruppe.name : 'Belegt'}</span>`
+      : `<span style="font-size:10px;color:#444;background:#111;border:1px solid #222;padding:2px 8px;border-radius:8px;">Frei</span>`;
+    return `<div class="row ${i%2===1?'alt':''}" style="cursor:default;">
+      <div>
+        <div style="font-size:11px;color:#aaa;">${f.kz}</div>
+        <div style="font-size:13px;color:#ddd;font-weight:500;">${f.modell}</div>
+      </div>
+      ${statusBadge}
+    </div>`;
+  }).join('');
+
+  go('screen-fahrzeuge');
+}
+
+function openNeueGruppeVonFahrzeuge() {
+  // Zurück zu Gruppen-Screen und Neue Gruppe öffnen
+  go('screen-gruppen');
+  setTimeout(() => openNeueGruppe(), 50);
+}
+
 
 </script>
 
