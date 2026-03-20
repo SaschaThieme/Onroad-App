@@ -603,36 +603,27 @@ function setHdr(px){
   ids.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[n,d,'⬤ '+u][i];});
 }
 
-async function doLogin() {
-  // 1. Namen aus dem Feld holen oder "Gast" nutzen, falls leer
-  const u = document.getElementById('login-user').value.trim() || "Gast";
-  
-  // 2. WICHTIG: Die Variable global definieren, damit der Fehler aus dem Screenshot verschwindet
-  window.currentUser = u; 
-  
-  // 3. UI vorbereiten
+let currentUser = '';
+
+async function doLogin(){
+  const u = (document.getElementById('login-user').value.trim()) || 'Instruktor';
+  const p = document.getElementById('login-pass').value;
+  currentUser = u;
+  window.currentUser = u;
   document.getElementById('login-err').style.display = 'none';
   const btn = document.getElementById('login-btn');
-  btn.textContent = 'Anmelden…';
-  btn.style.opacity = '.6';
-
+  if(btn){ btn.textContent='Anmelden…'; btn.style.opacity='.6'; }
   try {
-    // 4. Den API-Check (Passwortprüfung) komplett überspringen
-    // Wir setzen den Namen direkt in die Anzeige
-    const userDisplay = document.getElementById('ev-user');
-    if (userDisplay) userDisplay.textContent = '⬤ ' + u;
-    
-    // 5. App-Daten laden und zum Hauptbildschirm springen
-    await loadEvents();
+    try { await API.login(u, p); } catch(e) { console.warn('API.login:', e.message); }
+    const evUser = document.getElementById('ev-user');
+    if(evUser) evUser.textContent = '⬤ ' + u;
+    try { await loadEvents(); } catch(e) { console.warn('loadEvents:', e.message); }
     go('screen-events');
-    
-  } catch (e) {
-    console.error("Login-Fehler abgefangen:", e);
-    // Selbst wenn etwas schiefgeht, lassen wir dich rein
+  } catch(e) {
+    console.error('doLogin error:', e);
     go('screen-events');
   } finally {
-    btn.textContent = 'Anmelden';
-    btn.style.opacity = '';
+    if(btn){ btn.textContent='Anmelden'; btn.style.opacity=''; }
   }
 }
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
