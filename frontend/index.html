@@ -337,6 +337,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
 </div>
 
+
 <script>
 /**
  * api.js – Frontend API-Layer
@@ -577,8 +578,7 @@ window.API = {
   offlineQueue,
 };
 
-</script>
-<script>
+
 // Preload fonts
 document.fonts.ready.then(()=>{
   document.querySelectorAll('.mb-wm').forEach(el=>el.style.opacity='1');
@@ -1050,6 +1050,7 @@ function function editGruppenName() {
     })
     .catch(e => toast('Fehler: ' + e.message));
 }
+
 </script>
 
 <!-- FAHRTENBUCH -->
