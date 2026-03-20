@@ -34,16 +34,38 @@ const MOCK = {
     { id:5, name:'Driving Events Masterclass Hamburg',   datum_von:daysFromNow(13), datum_bis:daysFromNow(13), ende_uhrzeit:'17:00', ort:'Hamburg' },
   ],
   fahrzeuge: [
-    {id:1, modell:'AMG A 45 S 4MATIC+',         kz:'S-MB 1045'},
-    {id:2, modell:'AMG C 63 S E PERFORMANCE',    kz:'S-MB 2063'},
-    {id:3, modell:'AMG GT 63 S 4MATIC+',         kz:'S-MB 3063'},
-    {id:4, modell:'AMG GLE 53 4MATIC+',          kz:'S-MB 4053'},
-    {id:5, modell:'AMG SL 63 4MATIC+',           kz:'S-MB 5063'},
-    {id:6, modell:'EQS 53 AMG 4MATIC+',          kz:'S-MB 6053'},
-    {id:7, modell:'EQE 43 AMG 4MATIC',           kz:'S-MB 7043'},
-    {id:8, modell:'Mercedes-AMG GT R Pro',        kz:'S-MB 8001'},
-    {id:9, modell:'C 300 4MATIC Limousine',       kz:'S-MB 9300'},
-    {id:10,modell:'E 450 4MATIC T-Modell',        kz:'S-MB 450E'},
+    // Event 1 – AMG Driving Academy Hockenheimring
+    {id:1,  event_id:1, modell:'AMG A 45 S 4MATIC+',          kz:'S-MB 1045'},
+    {id:2,  event_id:1, modell:'AMG C 63 S E PERFORMANCE',    kz:'S-MB 2063'},
+    {id:3,  event_id:1, modell:'AMG GT 63 S 4MATIC+',         kz:'S-MB 3063'},
+    {id:4,  event_id:1, modell:'AMG GLE 53 4MATIC+',          kz:'S-MB 4053'},
+    {id:5,  event_id:1, modell:'AMG SL 63 4MATIC+',           kz:'S-MB 5063'},
+    {id:6,  event_id:1, modell:'EQS 53 AMG 4MATIC+',          kz:'S-MB 6053'},
+    {id:7,  event_id:1, modell:'EQE 43 AMG 4MATIC',           kz:'S-MB 7043'},
+    {id:8,  event_id:1, modell:'Mercedes-AMG GT R Pro',        kz:'S-MB 8001'},
+    // Event 2 – Mercedes-Benz Experience Day München
+    {id:9,  event_id:2, modell:'C 300 4MATIC Limousine',      kz:'S-MK 3001'},
+    {id:10, event_id:2, modell:'E 450 4MATIC T-Modell',       kz:'S-MK 4501'},
+    {id:11, event_id:2, modell:'S 500 4MATIC Limousine',      kz:'S-MK 5001'},
+    {id:12, event_id:2, modell:'GLC 300 4MATIC Coupé',        kz:'S-MK 3002'},
+    {id:13, event_id:2, modell:'GLE 450 4MATIC',              kz:'S-MK 4502'},
+    {id:14, event_id:2, modell:'EQC 400 4MATIC',              kz:'S-MK 4003'},
+    // Event 3 – EQ Performance Tour Frankfurt
+    {id:15, event_id:3, modell:'EQS 450+',                    kz:'S-EQ 4501'},
+    {id:16, event_id:3, modell:'EQE 350+',                    kz:'S-EQ 3501'},
+    {id:17, event_id:3, modell:'EQA 250+',                    kz:'S-EQ 2501'},
+    {id:18, event_id:3, modell:'EQB 300 4MATIC',              kz:'S-EQ 3002'},
+    // Event 4 – AMG GT Experience Berlin
+    {id:19, event_id:4, modell:'AMG GT 63 S 4MATIC+',         kz:'B-AMG 6301'},
+    {id:20, event_id:4, modell:'AMG GT 53 4MATIC+',           kz:'B-AMG 5301'},
+    {id:21, event_id:4, modell:'AMG C 43 4MATIC',             kz:'B-AMG 4301'},
+    {id:22, event_id:4, modell:'AMG GLE 63 S 4MATIC+',        kz:'B-AMG 6302'},
+    {id:23, event_id:4, modell:'AMG SL 55 4MATIC+',           kz:'B-AMG 5502'},
+    // Event 5 – Driving Events Masterclass Hamburg
+    {id:24, event_id:5, modell:'S 580 4MATIC L Maybach',      kz:'HH-MB 5801'},
+    {id:25, event_id:5, modell:'GLS 600 4MATIC Maybach',      kz:'HH-MB 6001'},
+    {id:26, event_id:5, modell:'S 450 4MATIC Limousine',      kz:'HH-MB 4501'},
+    {id:27, event_id:5, modell:'EQS 580 4MATIC',              kz:'HH-EQ 5801'},
   ],
   teilnehmer: [
     {id:'T001',vorname:'Alexander',nachname:'Becker',qr_code:'QR-T001',nfc_id:'NFC-T001'},
@@ -60,8 +82,13 @@ const MOCK = {
     {id:'T012',vorname:'Sabine',nachname:'Richter',qr_code:'QR-T012',nfc_id:'NFC-T012'},
   ],
   gruppen: [
-    {id:1,event_id:1,name:'Gruppe Philipp',instruktor:'Philipp.explainer',status:'Geplant',fahrzeug_ids:[1,2,3,4]},
-    {id:2,event_id:1,name:'Gruppe Marco',instruktor:'Marco.trainer',status:'Geplant',fahrzeug_ids:[5,6,7,8]},
+    {id:1, event_id:1, name:'Gruppe Philipp',   instruktor:'Philipp.explainer', status:'Geplant', fahrzeug_ids:[1,2,3,4]},
+    {id:2, event_id:1, name:'Gruppe Marco',     instruktor:'Marco.trainer',     status:'Geplant', fahrzeug_ids:[5,6,7,8]},
+    {id:3, event_id:2, name:'Gruppe München A', instruktor:'Philipp.explainer', status:'Geplant', fahrzeug_ids:[9,10,11]},
+    {id:4, event_id:2, name:'Gruppe München B', instruktor:'Anna.instructor',   status:'Geplant', fahrzeug_ids:[12,13,14]},
+    {id:5, event_id:3, name:'Gruppe EQ Tour',   instruktor:'Philipp.explainer', status:'Geplant', fahrzeug_ids:[15,16,17,18]},
+    {id:6, event_id:4, name:'Gruppe AMG Berlin',instruktor:'Marco.trainer',     status:'Geplant', fahrzeug_ids:[19,20,21,22,23]},
+    {id:7, event_id:5, name:'Gruppe Masterclass',instruktor:'Philipp.explainer',status:'Geplant', fahrzeug_ids:[24,25,26,27]},
   ],
   checkins: [],
 };
@@ -87,7 +114,7 @@ async function getEvent(eventId) {
 
 // ── FAHRZEUGE ─────────────────────────────────────────────────────────────
 async function getFahrzeugeByEvent(eventId) {
-  if (MODE==='mock') return MOCK.fahrzeuge;
+  if (MODE==='mock') return MOCK.fahrzeuge.filter(f => !f.event_id || f.event_id === Number(eventId));
   if (MODE==='db') { const {query}=getDb(); const {rows}=await query('SELECT * FROM fahrzeuge WHERE event_id=$1 ORDER BY id',[eventId]); return rows; }
   return demRequest('GET',`/api/events/${eventId}/fahrzeuge`);
 }
