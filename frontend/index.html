@@ -69,7 +69,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .tbl-row.alt{background:rgba(0,180,240,.03);}
 .fzg-n{font-size:14px;line-height:1.35;color:#ddd;}
 .fzg-k{font-size:12px;color:#555;margin-top:2px;}
-.tc{font-size:13px;text-align:center;color:#ddd;}
+.tc{font-size:13px;color:#ddd;display:flex;align-items:center;justify-content:center;}
 .tc.empty-val{color:#2a2a2a;}
 .abtn{width:100%;border:none;color:#fff;font-weight:700;font-size:13px;padding:12px 4px;border-radius:12px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;}
 .abtn:active{opacity:.7;}
@@ -221,7 +221,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
           </button>
         </div>
       </div>
-      <div class="tbl-hd"><span>Fahrzeug</span><span style="text-align:center;">Teilnehmer</span><span style="text-align:center;">Seit</span><span></span></div>
+      <div class="tbl-hd"><span>Fahrzeug</span><span style="display:flex;justify-content:center;">Teilnehmer</span><span style="display:flex;justify-content:center;">Seit</span><span></span></div>
       <div id="fzg-list"></div>
       <div class="tbl-foot">
         <span>25 pro Seite</span>
@@ -285,7 +285,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
         <button onclick="applyNameCorrection()" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;background:#00b4f0;border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">Name übernehmen</button>
       </div>
     </div>
-    <div class="res-card"><div class="res-label">Fahrzeug</div><div id="res-fzg" class="res-value"></div><div id="res-kz" class="res-sub"></div></div>
+    <div class="res-card"><div class="res-label">Fahrzeug</div><div id="res-kz" class="res-value"></div><div id="res-fzg" class="res-sub"></div></div>
     <div class="res-card">
       <div class="res-label">Eincheck-Zeit</div>
       <div id="res-time" class="res-value"></div>
@@ -568,7 +568,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div style="font-size:11px;color:#aaa;margin-bottom:1px;">${f.kz}</div><div class="fzg-n">${f.modell||f.name||'—'}</div></div><div class="tc${ev}">${c?c.name:'—'}</div><div class="tc${ev}" style="font-size:11px;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
+    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:1px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></div><div class="tc${ev}">${c?c.name:'—'}</div><div class="tc${ev}" style="font-size:11px;">${c?fmtTime(c.seit):'—'}</div><div>${abtn}</div></div>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
@@ -590,7 +590,7 @@ async function alleAbmelden(){
 function startScan(fzgId){
   S.aktiveFzgId=fzgId;S.scanResult=null;
   const fzg=S.fahrzeuge.find(f=>f.id===fzgId);
-  document.getElementById('scan-prompt').textContent=`Um einen Fahrer für "${fzg.modell||fzg.name}" anzumelden, scannen Sie bitte den QR-Code oder halten Sie das NFC-Namensschild ans Gerät.`;
+  document.getElementById('scan-prompt').textContent=`Fahrzeug ${fzg.kz} – QR-Code scannen oder NFC ans Gerät halten.`;
   setHdr('sc');go('screen-scanner');startScanAnim();
   clearTimeout(S.scanTimer);
   S.scanTimer=setTimeout(async()=>{
@@ -625,8 +625,8 @@ function scanAbbrechen(){clearTimeout(S.scanTimer);stopScanAnim();go('screen-gru
 function showScanResult(eintrag){
   const fzg=S.fahrzeuge.find(f=>f.id===S.aktiveFzgId),tn=S.scanResult;
   document.getElementById('res-name').textContent=`${tn.vorname} ${tn.nachname}`;
+  document.getElementById('res-kz').textContent=fzg.kz;
   document.getElementById('res-fzg').textContent=fzg.modell||fzg.name;
-  document.getElementById('res-kz').textContent=`Kennzeichen: ${fzg.kz}`;
   document.getElementById('res-time').textContent=fmtTime(new Date(eintrag.ein).getTime());
   setHdr('sr');go('screen-scan-result');
 }
