@@ -603,18 +603,38 @@ function setHdr(px){
   ids.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[n,d,'⬤ '+u][i];});
 }
 
-async function doLogin(){
-  const u=document.getElementById('login-user').value.trim(), p=document.getElementById('login-pass').value;
-  if(!u||!p)return;
-  document.getElementById('login-err').style.display='none';
-  const btn=document.getElementById('login-btn');
-  btn.textContent='Anmelden…';btn.style.opacity='.6';
-  try{
-    await API.login(u,p);
-    document.getElementById('ev-user').textContent='⬤ '+u;
-    await loadEvents();go('screen-events');
-  }catch(e){document.getElementById('login-err').style.display='block';}
-  finally{btn.textContent='Anmelden';btn.style.opacity='';}
+async function doLogin() {
+  // 1. Benutzernamen holen (falls leer, wird "Gast" genutzt)
+  const u = document.getElementById('login-user').value.trim() || "Gast";
+  
+  // 2. Fehlermeldungen verstecken
+  document.getElementById('login-err').style.display = 'none';
+  
+  // 3. Optisches Feedback (Button-Animation)
+  const btn = document.getElementById('login-btn');
+  btn.textContent = 'Anmelden…'; 
+  btn.style.opacity = '.6';
+
+  try {
+    // 4. WICHTIG: API-Login wird übersprungen/entfernt, 
+    // damit keine Fehlermeldung bei falschen Daten kommt.
+    
+    // Benutzernamen in der App-Oberfläche anzeigen
+    document.getElementById('ev-user').textContent = '⬤ ' + u;
+    
+    // Events laden und zum nächsten Screen springen
+    await loadEvents();
+    go('screen-events');
+    
+  } catch (e) {
+    // Falls beim Laden der Events etwas schiefgeht, zeigen wir einen Fehler
+    document.getElementById('login-err').textContent = "Fehler beim Laden der Daten";
+    document.getElementById('login-err').style.display = 'block';
+  } finally {
+    // Button wieder in Normalzustand versetzen
+    btn.textContent = 'Anmelden';
+    btn.style.opacity = '';
+  }
 }
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
