@@ -133,14 +133,14 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .fzg-chk{width:20px;height:20px;border-radius:5px;border:1.5px solid #2a2a2a;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .fzg-chk.on{background:#00b4f0;border-color:#00b4f0;}
 
-.fb-table{width:100%;border-collapse:collapse;font-size:12px;}
+.fb-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
 .fb-table th{color:#00b4f0;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.4px;padding:8px 12px;text-align:left;border-bottom:1px solid #1e1e1e;background:#080808;}
 .fb-table td{padding:10px 12px;border-bottom:1px solid #141414;color:#ccc;vertical-align:top;}
 .fb-table tr:nth-child(even) td{background:#080808;}
 .fb-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
 .fb-badge.offen{background:rgba(0,180,240,.15);color:#00b4f0;border:1px solid rgba(0,180,240,.3);}
 .fb-badge.abg{background:#111;color:#444;border:1px solid #1e1e1e;}
-.fb-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.fb-summary{display:none;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
 .fb-stat{background:#111;border-radius:12px;padding:12px;border:1px solid #1e1e1e;text-align:center;}
 .fb-stat-val{font-size:22px;font-weight:700;color:#00b4f0;}
 .fb-stat-lbl{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
@@ -230,7 +230,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
       <div id="fzg-list"></div>
       <div class="tbl-foot">
         <span>25 pro Seite</span>
-        <span id="pag-info" style="color:#333;font-size:11px;"></span>
+        <span id="pag-info" style="color:#999;font-size:13px;"></span>
         <span style="color:#222;display:flex;gap:10px;">‹ ›</span>
       </div>
     </div>
@@ -333,19 +333,8 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 </div>
 
 <script src="/api.js">
-function editGruppenName() {
-  if (!S.aktiveGruppe) return;
-  const neu = prompt('Gruppenname:', S.aktiveGruppe.name);
-  if (!neu || neu.trim() === S.aktiveGruppe.name) return;
-  API.updateGruppe(S.aktiveGruppe.id, {name: neu.trim()})
-    .then(() => {
-      S.aktiveGruppe.name = neu.trim();
-      S.gruppen = S.gruppen.map(g => g.id === S.aktiveGruppe.id ? {...g, name: neu.trim()} : g);
-      document.getElementById('gd-title').textContent = 'Gruppe "' + neu.trim() + '"';
-      toast('✓ Gruppenname geändert');
-    })
-    .catch(e => toast('Fehler: ' + e.message));
-}
+
+
 
 </script>
 <script>
@@ -512,7 +501,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<div class="tbl-row ${i%2===1?'alt':''}"><div><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:1px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></div><div style="text-align:center;font-size:13px;color:${c?'#ddd':'#333'};width:100%;">${c?c.name:'—'}</div><div style="text-align:center;font-size:12px;color:${c?'#888':'#333'};width:100%;">${c?fmtTime(c.seit):'—'}</div><div class="tbl-col4">${abtn}</div></div>`;
+    return `<div class="tbl-row ${i%2===1?'alt':''}"><div class="tbl-col1"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></div><div class="tbl-col2" style="font-size:13px;color:${c?'#ddd':'#333'};">${c?c.name:'—'}</div><div class="tbl-col3" style="font-size:12px;color:${c?'#888':'#333'};">${c?fmtTime(c.seit):'—'}</div><div class="tbl-col4">${abtn}</div></div>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
@@ -649,7 +638,7 @@ async function loadFahrtenbuch() {
   const cont = document.getElementById('fb-content');
   const summ = document.getElementById('fb-summary');
   cont.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
-  summ.innerHTML = '';
+  summ.style.display='none'; summ.innerHTML = '';
   try {
     const eventId = S.aktiveEvent ? S.aktiveEvent.id : (S.aktiveGruppe ? S.aktiveGruppe.event_id : 1);
     const res = await fetch(`/api/events/${eventId}/fahrtenbuch`);
@@ -659,6 +648,7 @@ async function loadFahrtenbuch() {
     const total   = data.length;
     const offen   = data.filter(r => !r.aus).length;
     const personen = [...new Set(data.map(r => r.nachname + r.vorname))].length;
+    summ.style.display='grid';
     summ.innerHTML = `
       <div class="fb-stat"><div class="fb-stat-val">${total}</div><div class="fb-stat-lbl">Fahrten</div></div>
       <div class="fb-stat"><div class="fb-stat-val">${personen}</div><div class="fb-stat-lbl">Teilnehmer</div></div>
@@ -672,7 +662,7 @@ async function loadFahrtenbuch() {
 
     if (S.nameKorrekturen) {
       data.forEach(r => {
-        const cor = S.nameKorrekturen[r.fahrzeug_id];
+        const cor = S.nameKorrekturen[r.fahrzeug_id] || S.nameKorrekturen['tn_'+r.teilnehmer_id];
         if (cor) { const p = cor.split(' '); r.vorname = p[0]; r.nachname = p.slice(1).join(' '); }
       });
     }
@@ -697,7 +687,7 @@ async function loadFahrtenbuch() {
 
     cont.innerHTML = `<table class="fb-table">
       <thead><tr>
-        <th>Teilnehmer</th><th>Kennzeichen</th><th>Fahrzeug</th><th>Gruppe</th>
+        <th style="width:22%">Teilnehmer</th><th style="width:13%">KZ</th><th style="width:22%">Fahrzeug</th><th style="width:15%">Gruppe</th>
         <th style="text-align:center">Ein</th><th style="text-align:center">Aus</th>
         <th style="text-align:center">Dauer</th><th>Status</th>
       </tr></thead>
@@ -749,6 +739,8 @@ function applyNameCorrection() {
     if (S.checkins[S.aktiveFzgId]) S.checkins[S.aktiveFzgId].name = vn + ' ' + nn;
     if (!S.nameKorrekturen) S.nameKorrekturen = {};
     S.nameKorrekturen[S.aktiveFzgId] = vn + ' ' + nn;
+    // Also store by scan result ID for Fahrtenbuch
+    if (S.scanResult && S.scanResult.id) S.nameKorrekturen['tn_'+S.scanResult.id] = vn + ' ' + nn;
   }
   document.getElementById('name-edit-area').style.display = 'none';
   toast('✓ Name korrigiert');
@@ -802,6 +794,21 @@ function openNeueGruppeVonFahrzeuge() {
 }
 
 
+
+
+function function editGruppenName() {
+  if (!S.aktiveGruppe) return;
+  const neu = prompt('Gruppenname:', S.aktiveGruppe.name);
+  if (!neu || neu.trim() === S.aktiveGruppe.name) return;
+  API.updateGruppe(S.aktiveGruppe.id, {name: neu.trim()})
+    .then(() => {
+      S.aktiveGruppe.name = neu.trim();
+      S.gruppen = S.gruppen.map(g => g.id === S.aktiveGruppe.id ? {...g, name: neu.trim()} : g);
+      document.getElementById('gd-title').textContent = 'Gruppe "' + neu.trim() + '"';
+      toast('✓ Gruppenname geändert');
+    })
+    .catch(e => toast('Fehler: ' + e.message));
+}
 </script>
 
 <!-- FAHRTENBUCH -->
