@@ -151,10 +151,11 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .fb-stat-val{font-size:22px;font-weight:700;color:#00b4f0;}
 .fb-stat-lbl{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
 
-.tbl-col1{flex:2;min-width:120px;}
-.tbl-col2{flex:1.5;min-width:110px;display:flex;align-items:center;justify-content:center;}
-.tbl-col3{width:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.tbl-col4{width:96px;flex-shrink:0;}
+
+.tbl-col1{flex:0 0 38%;min-width:0;}
+.tbl-col2{flex:0 0 30%;min-width:0;display:flex;align-items:center;justify-content:center;}
+.tbl-col3{flex:0 0 12%;min-width:0;display:flex;align-items:center;justify-content:center;}
+.tbl-col4{flex:0 0 20%;min-width:0;}
 </style>
 </head>
 <body>
@@ -223,7 +224,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
     <div class="card">
       <div class="grp-hdr">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span id="gd-title" class="grp-title" style="cursor:pointer;" onclick="editGruppenName()"></span><span onclick="editGruppenName()" style="color:#00b4f0;font-size:14px;cursor:pointer;margin-left:8px;opacity:.7;" title="Gruppenname ändern">✎</span>
+          <span id="gd-title" class="grp-title" style="cursor:pointer;" onclick="editGruppenName()"></span><span onclick="editGruppenName()" style="color:#00b4f0;font-size:16px;cursor:pointer;margin-left:10px;background:rgba(0,180,240,.15);padding:3px 8px;border-radius:8px;" title="Gruppenname ändern">✎ ändern</span>
         </div>
         <div class="grp-actions">
           <button class="btn" onclick="openFahrtenbuch()" style="flex:0;padding:8px 12px;font-size:11px;background:#1a2a1a;color:#3a9a3a;border-radius:10px;white-space:nowrap;">📋 Fahrtenbuch</button>
