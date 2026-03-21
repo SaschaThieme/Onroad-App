@@ -37,7 +37,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 #offline-banner.on{display:block;}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(8px);background:#1c1c1c;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;border:1px solid #2a2a2a;white-space:nowrap;z-index:9999;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.btn{flex:1;min-width:0;height:56px;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 8px rgba(255,255,255,.04);padding:0 8px;border-radius:16px;border:none;background:#1e1e1e;color:#fff;font-weight:700;font-size:15px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;font-family:'MBCorpoSText',sans-serif;}
+.btn{flex:1;min-width:0;height:56px;box-shadow:0 0 0 1px rgba(0,180,240,.25),0 0 10px rgba(0,180,240,.1);padding:0 8px;border-radius:16px;border:none;background:#1e1e1e;color:#fff;font-weight:700;font-size:15px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;font-family:'MBCorpoSText',sans-serif;}
 .btn:active{opacity:.7;}
 .btn.cyan{background:#00b4f0;box-shadow:0 0 16px rgba(0,180,240,.4);}
 .btn.danger{background:#8a1a1a;box-shadow:0 0 10px rgba(180,40,40,.3);}
@@ -250,7 +250,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
           </button>
         </div>
       </div>
-      <table class="fzg-table"><thead><tr><th class="col-fzg">Fahrzeug</th><th class="col-tn center">Teilnehmer</th><th class="col-seit center">Seit</th><th class="col-btn"></th></tr></thead><tbody id="fzg-list"></tbody></table><div class="tbl-foot" style="margin-top:0;">
+      <table class="fzg-table"><colgroup><col/><col/><col/><col/></colgroup><thead><tr><th>Fahrzeug</th><th style="text-align:center;">Teilnehmer</th><th style="text-align:center;">Seit</th><th></th></tr></thead><tbody id="fzg-list"></tbody></table><div class="tbl-foot" style="margin-top:0;">
         <span>25 pro Seite</span>
         <span id="pag-info" style="color:#999;font-size:13px;"></span>
         <span style="color:#222;display:flex;gap:10px;">‹ ›</span>
@@ -772,7 +772,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<tr class="fzg-row"><td class="col-fzg"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td class="col-tn center" style="color:${c?'#ddd':'#333'};">${c?(S.nameKorrekturen&&(S.nameKorrekturen[f.id]||S.nameKorrekturen['id_'+(c.teilnehmerId||'')])||c.name):'—'}</td><td class="col-seit center" style="color:${c?'#888':'#333'};font-size:12px;">${c?fmtTime(c.seit):'—'}</td><td class="col-btn">${abtn}</td></tr>`;
+    return `<tr style="border-bottom:1px solid rgba(0,180,240,.08);${i%2===1?'background:rgba(0,180,240,.02)':''}"><td style="padding:14px 12px;vertical-align:middle;"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#ddd':'#333'};">${c?(S.nameKorrekturen&&(S.nameKorrekturen[f.id]||S.nameKorrekturen['id_'+(c.teilnehmerId||'')])||c.name):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#888':'#333'};font-size:12px;">${c?fmtTime(c.seit):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:right;">${abtn}</td></tr>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
