@@ -211,6 +211,8 @@ async function getFahrtenbuch(eventId) {
         : null;
       return {
         id:            c.id,
+        teilnehmer_id: c.teilnehmer_id,
+        fahrzeug_id:   c.fahrzeug_id,
         vorname:       tn.vorname   || '–',
         nachname:      tn.nachname  || '–',
         fahrzeug:      fzg.modell   || '–',
