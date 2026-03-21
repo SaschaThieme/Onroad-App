@@ -69,9 +69,9 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .login-err{color:#cc4444;font-size:13px;text-align:center;display:none;}
 .login-btn{width:100%;padding:15px;border-radius:13px;background:#00b4f0;color:#fff;font-weight:700;font-size:16px;border:none;cursor:pointer;letter-spacing:.3px;transition:opacity .15s;}
 .login-btn:active{opacity:.8;}
-.tbl-hd{display:flex;padding:9px 14px;border-bottom:1px solid rgba(0,180,240,.15);background:#080808;align-items:center;}
+.tbl-hd{display:none;}
 .tbl-hd span{color:#00b4f0;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
-.tbl-row{display:flex;padding:14px 14px;align-items:center;border-bottom:1px solid rgba(0,180,240,.08);}
+.tbl-row{display:none;}
 .tbl-row.alt{background:rgba(0,180,240,.03);}
 .fzg-n{font-size:14px;line-height:1.35;color:#ddd;}
 .fzg-k{font-size:12px;color:#555;margin-top:2px;}
@@ -152,10 +152,28 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .fb-stat-lbl{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
 
 
-.tbl-col1{width:42%;flex-shrink:0;min-width:0;}
-.tbl-col2{width:28%;flex-shrink:0;text-align:center;display:flex;align-items:center;justify-content:center;}
-.tbl-col3{width:14%;flex-shrink:0;text-align:center;display:flex;align-items:center;justify-content:center;}
-.tbl-col4{width:16%;flex-shrink:0;}
+
+.fzg-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+.fzg-table th{color:#00b4f0;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:9px 10px;border-bottom:1px solid rgba(0,180,240,.15);background:#080808;text-align:left;}
+.fzg-table th.center{text-align:center;}
+.fzg-table td{padding:12px 10px;border-bottom:1px solid rgba(0,180,240,.08);vertical-align:middle;color:#ddd;font-size:13px;}
+.fzg-table tr:nth-child(even) td{background:rgba(0,180,240,.03);}
+.fzg-table td.center{text-align:center;}
+.col-fzg{width:40%;}
+.col-tn{width:27%;}
+.col-seit{width:13%;}
+.col-btn{width:20%;}
+
+.fzg-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+.fzg-table th{color:#00b4f0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:9px 10px;border-bottom:1px solid rgba(0,180,240,.15);background:#080808;text-align:left;}
+.fzg-table th.center{text-align:center;}
+.fzg-table td{padding:13px 10px;border-bottom:1px solid rgba(0,180,240,.08);vertical-align:middle;font-size:13px;color:#ddd;}
+.fzg-table td.center{text-align:center;}
+.fzg-table tr:nth-child(even) td{background:rgba(0,180,240,.02);}
+.fzg-table .col-fzg{width:38%;}
+.fzg-table .col-tn{width:28%;}
+.fzg-table .col-seit{width:14%;}
+.fzg-table .col-btn{width:20%;}
 </style>
 </head>
 <body>
@@ -232,9 +250,8 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
           </button>
         </div>
       </div>
-      <div class="tbl-hd"><span class="tbl-col1">Fahrzeug</span><span class="tbl-col2" style="color:#00b4f0;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:center;">Teilnehmer</span><span class="tbl-col3" style="color:#00b4f0;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Seit</span><span class="tbl-col4"></span></div>
-      <div id="fzg-list"></div>
-      <div class="tbl-foot">
+      <table class="fzg-table"><thead><tr><th class="col-fzg">Fahrzeug</th><th class="col-tn center">Teilnehmer</th><th class="col-seit center">Seit</th><th class="col-btn"></th></tr></thead><tbody id="fzg-list"></tbody></table><div style="display:none">
+      <div class="tbl-foot" style="margin-top:0;">
         <span>25 pro Seite</span>
         <span id="pag-info" style="color:#999;font-size:13px;"></span>
         <span style="color:#222;display:flex;gap:10px;">‹ ›</span>
@@ -243,9 +260,11 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   </div>
   <div class="bottom-bar">
     <button class="btn" onclick="go('screen-gruppen');loadGruppen()">Zurück</button>
-    <button class="btn" onclick="openFahrtenbuch()" style="background:#0d2a0d;color:#3aaa3a;border:1px solid #1a4a1a;">📋 Fahrtenbuch</button>
     <button class="btn cyan" onclick="openBearbeitenGruppe()">Fahrzeug&#10;bearbeiten</button>
     <button id="btn-alle" class="btn disabled" onclick="alleAbmelden()">Alle&#10;abmelden</button>
+  </div>
+  <div style="padding:0 12px 12px;">
+    <button onclick="openFahrtenbuch()" style="width:100%;height:54px;border-radius:14px;background:#0d2a0d;color:#4aba4a;border:1px solid #1a5a1a;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;letter-spacing:.3px;">📋 Fahrtenbuch anzeigen</button>
   </div>
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
 </div>
@@ -754,7 +773,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<div class="tbl-row ${i%2===1?'alt':''}"><div class="tbl-col1"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></div><div class="tbl-col2" style="font-size:13px;color:${c?'#ddd':'#333'};text-align:center;width:100%;justify-content:center;">${c?c.name:'—'}</div><div class="tbl-col3" style="font-size:12px;color:${c?'#888':'#333'};">${c?fmtTime(c.seit):'—'}</div><div class="tbl-col4">${abtn}</div></div>`;
+    return `<tr class="fzg-row"><td class="col-fzg"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td class="col-tn center" style="color:${c?'#ddd':'#333'};">${c?c.name:'—'}</td><td class="col-seit center" style="color:${c?'#888':'#333'};font-size:12px;">${c?fmtTime(c.seit):'—'}</td><td class="col-btn">${abtn}</td></tr>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
