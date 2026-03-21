@@ -82,8 +82,8 @@ const MOCK = {
     {id:'T012',vorname:'Sabine',nachname:'Richter',qr_code:'QR-T012',nfc_id:'NFC-T012'},
   ],
   gruppen: [
-    {id:1, event_id:1, name:'Gruppe Philipp',   instruktor:'Philipp.explainer', status:'Geplant', fahrzeug_ids:[1,2,3,4]},
-    {id:2, event_id:1, name:'Gruppe Marco',     instruktor:'Marco.trainer',     status:'Geplant', fahrzeug_ids:[5,6,7,8]},
+    {id:1, event_id:1, name:'Gruppe blau',   instruktor:'Philipp.explainer', status:'Geplant', fahrzeug_ids:[1,2,3,4]},
+    {id:2, event_id:1, name:'Gruppe rot',     instruktor:'Marco.trainer',     status:'Geplant', fahrzeug_ids:[5,6,7,8]},
     {id:3, event_id:2, name:'Gruppe München A', instruktor:'Philipp.explainer', status:'Geplant', fahrzeug_ids:[9,10,11]},
     {id:4, event_id:2, name:'Gruppe München B', instruktor:'Anna.instructor',   status:'Geplant', fahrzeug_ids:[12,13,14]},
     {id:5, event_id:3, name:'Gruppe EQ Tour',   instruktor:'Philipp.explainer', status:'Geplant', fahrzeug_ids:[15,16,17,18]},
