@@ -152,10 +152,10 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .fb-stat-lbl{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
 
 
-.tbl-col1{flex:0 0 38%;min-width:0;}
-.tbl-col2{flex:0 0 30%;min-width:0;display:flex;align-items:center;justify-content:center;}
-.tbl-col3{flex:0 0 12%;min-width:0;display:flex;align-items:center;justify-content:center;}
-.tbl-col4{flex:0 0 20%;min-width:0;}
+.tbl-col1{flex:2;min-width:0;overflow:hidden;}
+.tbl-col2{flex:1.5;min-width:0;text-align:center;display:flex;align-items:center;justify-content:center;}
+.tbl-col3{width:56px;flex-shrink:0;text-align:center;display:flex;align-items:center;justify-content:center;}
+.tbl-col4{width:92px;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -243,8 +243,8 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   </div>
   <div class="bottom-bar">
     <button class="btn" onclick="go('screen-gruppen');loadGruppen()">Zurück</button>
-    <button class="btn cyan" onclick="openBearbeitenGruppe()">Fahrzeugauswahl&#10;bearbeiten</button>
     <button class="btn" onclick="openFahrtenbuch()" style="background:#0d2a0d;color:#3aaa3a;border:1px solid #1a4a1a;">📋 Fahrtenbuch</button>
+    <button class="btn cyan" onclick="openBearbeitenGruppe()">Fahrzeug&#10;bearbeiten</button>
     <button id="btn-alle" class="btn disabled" onclick="alleAbmelden()">Alle&#10;abmelden</button>
   </div>
   <div class="footer">©2026, Mercedes-Benz Driving Events. Alle Rechte vorbehalten</div>
