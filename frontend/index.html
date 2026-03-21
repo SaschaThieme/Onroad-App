@@ -742,7 +742,7 @@ function renderGruppen(){
     list.innerHTML=vis.map((g,i)=>
       `<div class="row ${i%2===1?'alt':''}" onclick="openGruppe(${g.id})"><span class="row-name">${g.name}</span><span style="color:#444;font-size:20px;">›</span></div>`
     ).join('');
-    if(btn){ btn.className='btn cyan'; btn.onclick=()=>{S.aktiveGruppe=vis[0];openBearbeitenGruppe();}; }
+    if(btn){ btn.className='btn cyan'; btn.onclick=openFahrzeugUebersicht; }
   }
 }
 
