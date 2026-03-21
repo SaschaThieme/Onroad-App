@@ -37,10 +37,10 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 #offline-banner.on{display:block;}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(8px);background:#1c1c1c;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;border:1px solid #2a2a2a;white-space:nowrap;z-index:9999;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.btn{flex:1;min-width:0;height:56px;padding:0 8px;border-radius:16px;border:none;background:#1e1e1e;color:#fff;font-weight:700;font-size:15px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;font-family:'MBCorpoSText',sans-serif;}
+.btn{flex:1;min-width:0;height:56px;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 8px rgba(255,255,255,.04);padding:0 8px;border-radius:16px;border:none;background:#1e1e1e;color:#fff;font-weight:700;font-size:15px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;font-family:'MBCorpoSText',sans-serif;}
 .btn:active{opacity:.7;}
 .btn.cyan{background:#00b4f0;box-shadow:0 0 16px rgba(0,180,240,.4);}
-.btn.danger{background:#8a1a1a;}
+.btn.danger{background:#8a1a1a;box-shadow:0 0 10px rgba(180,40,40,.3);}
 .btn.disabled{background:#111;color:#2a2a2a;cursor:default;pointer-events:none;}
 .card{background:#111;border-radius:16px;overflow:hidden;border:1px solid rgba(0,180,240,.35);box-shadow:0 0 20px rgba(0,180,240,.12),0 0 60px rgba(0,180,240,.04);}
 .card-hd{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e1e;}
@@ -772,7 +772,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<tr class="fzg-row"><td class="col-fzg"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td class="col-tn center" style="color:${c?'#ddd':'#333'};">${c?c.name:'—'}</td><td class="col-seit center" style="color:${c?'#888':'#333'};font-size:12px;">${c?fmtTime(c.seit):'—'}</td><td class="col-btn">${abtn}</td></tr>`;
+    return `<tr class="fzg-row"><td class="col-fzg"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td class="col-tn center" style="color:${c?'#ddd':'#333'};">${c?(S.nameKorrekturen&&(S.nameKorrekturen[f.id]||S.nameKorrekturen['id_'+(c.teilnehmerId||'')])||c.name):'—'}</td><td class="col-seit center" style="color:${c?'#888':'#333'};font-size:12px;">${c?fmtTime(c.seit):'—'}</td><td class="col-btn">${abtn}</td></tr>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
@@ -800,14 +800,19 @@ function startScan(fzgId){
   S.scanTimer=setTimeout(async()=>{
     stopScanAnim();
     // Zufälligen Teilnehmer wählen der noch NICHT eingecheckt ist
-    const bereitsEingecheckt = Object.values(S.checkins).map(c=>c.name);
-    const verfuegbar = S.aktiveGruppe ? 
-      ['T001','T002','T003','T004','T005','T006','T007','T008','T009','T010','T011','T012']
-        .filter((_,i) => {
-          const mockName = ['Alexander Becker','Sophie Wagner','Michael Hoffmann','Laura Schneider','Thomas Müller','Julia Fischer','Stefan Weber','Anna Meyer','Christian Schmidt','Katrin Braun','Markus Wolf','Sabine Richter'][i];
-          return !bereitsEingecheckt.includes(mockName);
-        }) : ['T001'];
-    const qr = 'QR-' + (verfuegbar.length > 0 ? verfuegbar[Math.floor(Math.random()*verfuegbar.length)] : 'T001');
+    // Get names already checked in across ALL vehicles
+    const bereitsEingecheckt = new Set(Object.values(S.checkins).map(c=>c.name));
+    const alleMock = [
+      {id:'T001',n:'Alexander Becker'},{id:'T002',n:'Sophie Wagner'},
+      {id:'T003',n:'Michael Hoffmann'},{id:'T004',n:'Laura Schneider'},
+      {id:'T005',n:'Thomas Müller'},{id:'T006',n:'Julia Fischer'},
+      {id:'T007',n:'Stefan Weber'},{id:'T008',n:'Anna Meyer'},
+      {id:'T009',n:'Christian Schmidt'},{id:'T010',n:'Katrin Braun'},
+      {id:'T011',n:'Markus Wolf'},{id:'T012',n:'Sabine Richter'}
+    ];
+    const verfuegbar = alleMock.filter(t => !bereitsEingecheckt.has(t.n));
+    const chosen = verfuegbar.length > 0 ? verfuegbar[Math.floor(Math.random()*verfuegbar.length)] : alleMock[0];
+    const qr = 'QR-' + chosen.id;
     try{
       const res=await API.checkinQR(qr,S.aktiveFzgId,S.aktiveGruppe.id);
       S.scanResult=res.teilnehmer;
@@ -934,9 +939,11 @@ async function loadFahrtenbuch() {
     if (S.nameKorrekturen) {
       data.forEach(r => {
         const origName = r.vorname + ' ' + r.nachname;
+        // Try all stored keys
         const cor = S.nameKorrekturen['id_' + r.teilnehmer_id]
                  || S.nameKorrekturen['name_' + origName]
-                 || S.nameKorrekturen[r.fahrzeug_id];
+                 || S.nameKorrekturen[r.fahrzeug_id]
+                 || S.nameKorrekturen[String(r.fahrzeug_id)];
         if (cor) {
           const parts = cor.split(' ');
           r.vorname = parts[0];
