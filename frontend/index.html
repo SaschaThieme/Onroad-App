@@ -150,9 +150,9 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .fb-stat-val{font-size:22px;font-weight:700;color:#00b4f0;}
 .fb-stat-lbl{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
 
-.tbl-col1{flex:2;min-width:0;}
-.tbl-col2{flex:1.5;min-width:100px;text-align:center;}
-.tbl-col3{width:52px;text-align:center;flex-shrink:0;}
+.tbl-col1{flex:2;min-width:120px;}
+.tbl-col2{flex:1.5;min-width:110px;display:flex;align-items:center;justify-content:center;}
+.tbl-col3{width:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .tbl-col4{width:96px;flex-shrink:0;}
 </style>
 </head>
@@ -222,7 +222,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
     <div class="card">
       <div class="grp-hdr">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span id="gd-title" class="grp-title" style="cursor:pointer;" onclick="editGruppenName()"></span><span onclick="editGruppenName()" style="color:#444;font-size:14px;cursor:pointer;margin-left:8px;" title="Namen ändern">✎</span>
+          <span id="gd-title" class="grp-title" style="cursor:pointer;" onclick="editGruppenName()"></span><span onclick="editGruppenName()" style="color:#00b4f0;font-size:14px;cursor:pointer;margin-left:8px;opacity:.7;" title="Gruppenname ändern">✎</span>
         </div>
         <div class="grp-actions">
           <button class="btn" onclick="openFahrtenbuch()" style="flex:0;padding:8px 12px;font-size:11px;background:#1a2a1a;color:#3a9a3a;border-radius:10px;white-space:nowrap;">📋 Fahrtenbuch</button>
@@ -752,7 +752,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<div class="tbl-row ${i%2===1?'alt':''}"><div class="tbl-col1"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></div><div class="tbl-col2" style="font-size:13px;color:${c?'#ddd':'#333'};">${c?c.name:'—'}</div><div class="tbl-col3" style="font-size:12px;color:${c?'#888':'#333'};">${c?fmtTime(c.seit):'—'}</div><div class="tbl-col4">${abtn}</div></div>`;
+    return `<div class="tbl-row ${i%2===1?'alt':''}"><div class="tbl-col1"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></div><div class="tbl-col2" style="font-size:13px;color:${c?'#ddd':'#333'};text-align:center;width:100%;justify-content:center;">${c?c.name:'—'}</div><div class="tbl-col3" style="font-size:12px;color:${c?'#888':'#333'};">${c?fmtTime(c.seit):'—'}</div><div class="tbl-col4">${abtn}</div></div>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
@@ -913,8 +913,14 @@ async function loadFahrtenbuch() {
 
     if (S.nameKorrekturen) {
       data.forEach(r => {
-        const cor = S.nameKorrekturen[r.fahrzeug_id] || S.nameKorrekturen['tn_'+r.teilnehmer_id];
-        if (cor) { const p = cor.split(' '); r.vorname = p[0]; r.nachname = p.slice(1).join(' '); }
+        const origName = r.vorname + ' ' + r.nachname;
+        const cor = S.nameKorrekturen[r.fahrzeug_id]
+                 || S.nameKorrekturen['name_' + origName];
+        if (cor) {
+          const parts = cor.split(' ');
+          r.vorname = parts[0];
+          r.nachname = parts.slice(1).join(' ');
+        }
       });
     }
     const rows = data.map(r => {
@@ -987,11 +993,18 @@ function applyNameCorrection() {
   document.getElementById('res-name').textContent = `${vn} ${nn}`;
   // Update local checkin name
   if (S.aktiveFzgId) {
-    if (S.checkins[S.aktiveFzgId]) S.checkins[S.aktiveFzgId].name = vn + ' ' + nn;
+    const correctedName = vn + ' ' + nn;
+    if (S.checkins[S.aktiveFzgId]) S.checkins[S.aktiveFzgId].name = correctedName;
     if (!S.nameKorrekturen) S.nameKorrekturen = {};
-    S.nameKorrekturen[S.aktiveFzgId] = vn + ' ' + nn;
-    // Also store by scan result ID for Fahrtenbuch
-    if (S.scanResult && S.scanResult.id) S.nameKorrekturen['tn_'+S.scanResult.id] = vn + ' ' + nn;
+    // Store by fahrzeug_id
+    S.nameKorrekturen[S.aktiveFzgId] = correctedName;
+    // Store by original name for Fahrtenbuch lookup
+    if (S.scanResult) {
+      const origName = S.scanResult.vorname + ' ' + S.scanResult.nachname;
+      S.nameKorrekturen['name_' + origName] = correctedName;
+      S.scanResult.vorname = vn;
+      S.scanResult.nachname = nn;
+    }
   }
   document.getElementById('name-edit-area').style.display = 'none';
   toast('✓ Name korrigiert');
