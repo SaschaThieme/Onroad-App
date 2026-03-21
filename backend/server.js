@@ -31,7 +31,13 @@ app.use('/api/checkin', checkinRoute);
 
 // ── Frontend statisch ausliefern ──────────────────────────────────────────
 const frontendPath = path.join(__dirname, '../frontend');
-app.use(express.static(frontendPath));
+app.use(express.static(frontendPath, {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store');
+  }
+}));
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
