@@ -32,12 +32,12 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 
 .content{flex:1;padding:14px 12px;overflow-y:auto;}
 .footer{padding:10px 12px 18px;text-align:center;color:#333;font-size:10px;flex-shrink:0;letter-spacing:.2px;}
-.bottom-bar{flex-shrink:0;padding:12px 12px 28px;display:flex;gap:8px;background:#000;justify-content:center;}
+.bottom-bar{flex-shrink:0;padding:12px 12px 8px;display:flex;gap:8px;background:#000;justify-content:stretch;}
 #offline-banner{display:none;background:#5a1010;color:#ff8888;font-size:11px;font-weight:600;text-align:center;padding:7px;flex-shrink:0;}
 #offline-banner.on{display:block;}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(8px);background:#1c1c1c;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;border:1px solid #2a2a2a;white-space:nowrap;z-index:9999;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.btn{flex:1;min-width:0;max-width:280px;height:60px;padding:0 8px;border-radius:16px;border:none;background:#1e1e1e;color:#fff;font-weight:700;font-size:15px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;font-family:'MBCorpoSText',sans-serif;}
+.btn{flex:1;min-width:0;height:56px;padding:0 8px;border-radius:16px;border:none;background:#1e1e1e;color:#fff;font-weight:700;font-size:15px;line-height:1.3;white-space:pre-line;text-align:center;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;justify-content:center;font-family:'MBCorpoSText',sans-serif;}
 .btn:active{opacity:.7;}
 .btn.cyan{background:#00b4f0;box-shadow:0 0 16px rgba(0,180,240,.4);}
 .btn.danger{background:#8a1a1a;}
@@ -170,10 +170,10 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .fzg-table td{padding:13px 10px;border-bottom:1px solid rgba(0,180,240,.08);vertical-align:middle;font-size:13px;color:#ddd;}
 .fzg-table td.center{text-align:center;}
 .fzg-table tr:nth-child(even) td{background:rgba(0,180,240,.02);}
-.fzg-table .col-fzg{width:38%;}
+.fzg-table .col-fzg{width:40%;}
 .fzg-table .col-tn{width:28%;}
-.fzg-table .col-seit{width:14%;}
-.fzg-table .col-btn{width:20%;}
+.fzg-table .col-seit{width:12%;}
+.fzg-table .col-btn{width:20%;text-align:right;}
 </style>
 </head>
 <body>
@@ -250,8 +250,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
           </button>
         </div>
       </div>
-      <table class="fzg-table"><thead><tr><th class="col-fzg">Fahrzeug</th><th class="col-tn center">Teilnehmer</th><th class="col-seit center">Seit</th><th class="col-btn"></th></tr></thead><tbody id="fzg-list"></tbody></table><div style="display:none">
-      <div class="tbl-foot" style="margin-top:0;">
+      <table class="fzg-table"><thead><tr><th class="col-fzg">Fahrzeug</th><th class="col-tn center">Teilnehmer</th><th class="col-seit center">Seit</th><th class="col-btn"></th></tr></thead><tbody id="fzg-list"></tbody></table><div class="tbl-foot" style="margin-top:0;">
         <span>25 pro Seite</span>
         <span id="pag-info" style="color:#999;font-size:13px;"></span>
         <span style="color:#222;display:flex;gap:10px;">‹ ›</span>
