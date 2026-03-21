@@ -169,7 +169,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
 .fzg-table th.center{text-align:center;}
 .fzg-table td{padding:13px 10px;border-bottom:1px solid rgba(0,180,240,.08);vertical-align:middle;font-size:13px;color:#ddd;}
 .fzg-table td.center{text-align:center;}
-.fzg-table tr:nth-child(even) td{background:rgba(0,180,240,.02);}
+.fzg-table .tbl-alt td{background:rgba(0,180,240,.03);}
 .fzg-table .col-fzg{width:40%;}
 .fzg-table .col-tn{width:28%;}
 .fzg-table .col-seit{width:12%;}
@@ -250,7 +250,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
           </button>
         </div>
       </div>
-      <table class="fzg-table"><colgroup><col/><col/><col/><col/></colgroup><thead><tr><th>Fahrzeug</th><th style="text-align:center;">Teilnehmer</th><th style="text-align:center;">Seit</th><th></th></tr></thead><tbody id="fzg-list"></tbody></table><div class="tbl-foot" style="margin-top:0;">
+      <table class="fzg-table"><colgroup><col/><col/><col/><col/></colgroup><thead><tr><th>Kennzeichen</th><th style="text-align:center;">Teilnehmer</th><th style="text-align:center;">Seit</th><th></th></tr></thead><tbody id="fzg-list"></tbody></table><div class="tbl-foot" style="margin-top:0;">
         <span>25 pro Seite</span>
         <span id="pag-info" style="color:#999;font-size:13px;"></span>
         <span style="color:#222;display:flex;gap:10px;">‹ ›</span>
@@ -772,7 +772,7 @@ function renderFzgListe(){
     const c=S.checkins[f.id];if(c)hat=true;
     const ev=c?'':' empty-val';
     const abtn=c?`<button class="abtn d" onclick="fahrerAbmelden(${f.id})">Fahrer\nabmelden</button>`:`<button class="abtn c" onclick="startScan(${f.id})">Fahrer\nanmelden</button>`;
-    return `<tr style="border-bottom:1px solid rgba(0,180,240,.08);${i%2===1?'background:rgba(0,180,240,.02)':''}"><td style="padding:14px 12px;vertical-align:middle;"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#ddd':'#333'};">${c?(S.nameKorrekturen&&(S.nameKorrekturen[f.id]||S.nameKorrekturen['id_'+(c.teilnehmerId||'')])||c.name):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#888':'#333'};font-size:12px;">${c?fmtTime(c.seit):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:right;">${abtn}</td></tr>`;
+    return `<tr class="${i%2===1?'tbl-alt':''}"><td style="padding:14px 12px;vertical-align:middle;"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#ddd':'#333'}">${c?c.name:'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:center;font-size:12px;color:${c?'#888':'#333'}">${c?fmtTime(c.seit):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:right;">${abtn}</td></tr>`;
   }).join('');
   document.getElementById('pag-info').textContent=`${list.length} Fahrzeuge`;
   document.getElementById('btn-alle').className=hat?'btn danger':'btn disabled';
@@ -857,7 +857,7 @@ function renderEditFzg(){
   document.getElementById('edit-fzg-list').innerHTML=S.fahrzeuge.map(f=>{
     const on=S.editFzgIds.includes(f.id);
     const chk=on?`<div class="fzg-chk on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>`:`<div class="fzg-chk"></div>`;
-    return `<div class="fzg-row" onclick="toggleFzg(${f.id})">${chk}<div><div style="color:#ddd;font-size:14px;">${f.kz}</div><div style="color:#ddd;font-size:14px;font-weight:500;">${f.modell||f.name}</div></div></div>`;
+    return `<tr style="background:${i%2===1?'rgba(0,180,240,.02)':'transparent'};"><td style="padding:14px 12px;vertical-align:middle;"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#ddd':'#333'};">${c?(S.nameKorrekturen&&(S.nameKorrekturen[f.id]||S.nameKorrekturen['id_'+(c.teilnehmerId||'')])||c.name):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#888':'#333'};font-size:12px;">${c?fmtTime(c.seit):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:right;">${abtn}</td></tr>`;
   }).join('');
 }
 
@@ -940,10 +940,12 @@ async function loadFahrtenbuch() {
       data.forEach(r => {
         const origName = r.vorname + ' ' + r.nachname;
         // Try all stored keys
-        const cor = S.nameKorrekturen['id_' + r.teilnehmer_id]
-                 || S.nameKorrekturen['name_' + origName]
-                 || S.nameKorrekturen[r.fahrzeug_id]
-                 || S.nameKorrekturen[String(r.fahrzeug_id)];
+        // Match by checkin timestamp (most specific - won't affect other checkins)
+        const einTime = r.ein ? new Date(r.ein).toISOString() : null;
+        const cor = (einTime && S.nameKorrekturen['time_' + einTime])
+                 || S.nameKorrekturen['id_' + r.teilnehmer_id + '_' + (r.fahrzeug_id||'')]
+                 || null;
+        // Do NOT use fahrzeug_id alone as key - it would affect future checkins on same vehicle
         if (cor) {
           const parts = cor.split(' ');
           r.vorname = parts[0];
@@ -1020,20 +1022,23 @@ function applyNameCorrection() {
   if (!S.nameKorrekturen) S.nameKorrekturen = {};
 
   if (S.scanResult) {
-    // By original teilnehmer ID (most reliable)
-    S.nameKorrekturen['id_' + S.scanResult.id] = correctedName;
-    // By original full name
-    const origName = S.scanResult.vorname + ' ' + S.scanResult.nachname;
-    S.nameKorrekturen['name_' + origName] = correctedName;
+    // Store by teilnehmer_id + fahrzeug_id combo (unique per checkin slot)
+    const uniqueKey = 'id_' + S.scanResult.id + '_' + (S.aktiveFzgId||'');
+    S.nameKorrekturen[uniqueKey] = correctedName;
     // Update scanResult
     S.scanResult.vorname = vn;
     S.scanResult.nachname = nn;
   }
 
-  // By fahrzeug_id for local display
+  // By fahrzeug_id for local display (current session only)
   if (S.aktiveFzgId) {
+    if (S.checkins[S.aktiveFzgId]) {
+      S.checkins[S.aktiveFzgId].name = correctedName;
+      // Store with unique checkin timestamp so it's not confused with future checkins
+      const checkinTime = new Date(S.checkins[S.aktiveFzgId].seit).toISOString();
+      S.nameKorrekturen['time_' + checkinTime] = correctedName;
+    }
     S.nameKorrekturen[S.aktiveFzgId] = correctedName;
-    if (S.checkins[S.aktiveFzgId]) S.checkins[S.aktiveFzgId].name = correctedName;
   }
 
   document.getElementById('res-name').textContent = correctedName;
