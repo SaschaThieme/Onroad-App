@@ -1047,7 +1047,7 @@ function openNeueGruppeVonFahrzeuge() {
 
 
 
-function function editGruppenName() {
+function editGruppenName() {
   if (!S.aktiveGruppe) return;
   const neu = prompt('Gruppenname:', S.aktiveGruppe.name);
   if (!neu || neu.trim() === S.aktiveGruppe.name) return;
