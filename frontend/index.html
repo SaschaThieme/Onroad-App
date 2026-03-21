@@ -259,7 +259,7 @@ input,button{outline:none;-webkit-appearance:none;font-family:inherit;}
   </div>
   <div class="bottom-bar">
     <button class="btn" onclick="go('screen-gruppen');loadGruppen()">Zurück</button>
-    <button class="btn cyan" onclick="openBearbeitenGruppe()">Fahrzeug&#10;bearbeiten</button>
+    <button class="btn cyan" onclick="openBearbeitenGruppe()">Fahrzeugauswahl&#10;bearbeiten</button>
     <button id="btn-alle" class="btn disabled" onclick="alleAbmelden()">Alle&#10;abmelden</button>
   </div>
   <div style="padding:0 12px 12px;">
@@ -781,7 +781,12 @@ function renderFzgListe(){
 
 
 async function fahrerAbmelden(fzgId){
-  try{await API.checkout(fzgId);delete S.checkins[fzgId];renderFzgListe();toast('✓ Fahrer abgemeldet');}
+  try{
+    const _n=S.checkins[fzgId]?.name;
+    await API.checkout(fzgId);
+    delete S.checkins[fzgId];
+    if(_n&&S._allUsedNames)S._allUsedNames=S._allUsedNames.filter(x=>x!==_n);
+    renderFzgListe();toast('✓ Fahrer abgemeldet');}
   catch(e){toast('Fehler: '+e.message);}
 }
 
@@ -800,8 +805,11 @@ function startScan(fzgId){
   S.scanTimer=setTimeout(async()=>{
     stopScanAnim();
     // Zufälligen Teilnehmer wählen der noch NICHT eingecheckt ist
-    // Get names already checked in across ALL vehicles
-    const bereitsEingecheckt = new Set(Object.values(S.checkins).map(c=>c.name));
+    // Get names already checked in across ALL vehicles in ALL groups
+    const bereitsEingecheckt = new Set([
+      ...Object.values(S.checkins).map(c=>c.name),
+      ...(S._allCheckedInNames||[])
+    ]);
     const alleMock = [
       {id:'T001',n:'Alexander Becker'},{id:'T002',n:'Sophie Wagner'},
       {id:'T003',n:'Michael Hoffmann'},{id:'T004',n:'Laura Schneider'},
@@ -817,7 +825,10 @@ function startScan(fzgId){
       const res=await API.checkinQR(qr,S.aktiveFzgId,S.aktiveGruppe.id);
       S.scanResult=res.teilnehmer;
       const tn=res.teilnehmer;
-      S.checkins[S.aktiveFzgId]={name:`${tn.vorname} ${tn.nachname}`,seit:new Date(res.eintrag.ein).getTime()};
+      const fullName = `${tn.vorname} ${tn.nachname}`;
+    S.checkins[S.aktiveFzgId]={name:fullName,seit:new Date(res.eintrag.ein).getTime()};
+    if(!S._allCheckedInNames) S._allCheckedInNames=[];
+    if(!S._allCheckedInNames.includes(fullName)) S._allCheckedInNames.push(fullName);
       showScanResult(res.eintrag);
     }catch(e){toast('Scan fehlgeschlagen');go('screen-gruppe-detail');}
   },2500);
@@ -940,12 +951,10 @@ async function loadFahrtenbuch() {
       data.forEach(r => {
         const origName = r.vorname + ' ' + r.nachname;
         // Try all stored keys
-        // Match by checkin timestamp (most specific - won't affect other checkins)
+        // Match ONLY by exact checkin timestamp - never bleeds into other checkins
         const einTime = r.ein ? new Date(r.ein).toISOString() : null;
-        const cor = (einTime && S.nameKorrekturen['time_' + einTime])
-                 || S.nameKorrekturen['id_' + r.teilnehmer_id + '_' + (r.fahrzeug_id||'')]
-                 || null;
-        // Do NOT use fahrzeug_id alone as key - it would affect future checkins on same vehicle
+        const cor = einTime ? (S.nameKorrekturen['time_' + einTime] || null) : null;
+        if(cor) console.log('Applied correction for', einTime, '->', cor);
         if (cor) {
           const parts = cor.split(' ');
           r.vorname = parts[0];
@@ -1034,11 +1043,12 @@ function applyNameCorrection() {
   if (S.aktiveFzgId) {
     if (S.checkins[S.aktiveFzgId]) {
       S.checkins[S.aktiveFzgId].name = correctedName;
-      // Store with unique checkin timestamp so it's not confused with future checkins
+      if(S._allUsedNames){const oi=S._allUsedNames.indexOf(S.checkins[S.aktiveFzgId]?.name);if(oi>=0)S._allUsedNames[oi]=correctedName;}
+      // Key: ISO timestamp of this specific checkin
       const checkinTime = new Date(S.checkins[S.aktiveFzgId].seit).toISOString();
       S.nameKorrekturen['time_' + checkinTime] = correctedName;
+      console.log('Stored correction:', 'time_'+checkinTime, '->', correctedName);
     }
-    S.nameKorrekturen[S.aktiveFzgId] = correctedName;
   }
 
   document.getElementById('res-name').textContent = correctedName;
