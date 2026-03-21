@@ -865,10 +865,19 @@ function openBearbeitenGruppe(){
 
 function renderEditFzg(){
   document.getElementById('edit-fzg-label').textContent=`Fahrzeuge – ${S.editFzgIds.length} ausgewählt`;
+  // Fahrzeuge die bereits in aktiven anderen Gruppen sind
+  const belegtMap={};
+  S.gruppen.filter(g=>g.status==='Aktiv'&&(!S.aktiveGruppe||g.id!==S.aktiveGruppe.id)).forEach(g=>{
+    (g.fahrzeug_ids||g.fahrzeugIds||[]).forEach(id=>{belegtMap[id]=g.name;});
+  });
   document.getElementById('edit-fzg-list').innerHTML=S.fahrzeuge.map(f=>{
     const on=S.editFzgIds.includes(f.id);
-    const chk=on?`<div class="fzg-chk on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>`:`<div class="fzg-chk"></div>`;
-    return `<tr style="background:${i%2===1?'rgba(0,180,240,.02)':'transparent'};"><td style="padding:14px 12px;vertical-align:middle;"><div style="font-size:14px;font-weight:600;color:#eee;margin-bottom:2px;">${f.kz}</div><div style="font-size:12px;color:#555;">${f.modell||f.name||'—'}</div></td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#ddd':'#333'};">${c?(S.nameKorrekturen&&(S.nameKorrekturen[f.id]||S.nameKorrekturen['id_'+(c.teilnehmerId||'')])||c.name):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:center;color:${c?'#888':'#333'};font-size:12px;">${c?fmtTime(c.seit):'—'}</td><td style="padding:14px 12px;vertical-align:middle;text-align:right;">${abtn}</td></tr>`;
+    const belegt=belegtMap[f.id];
+    const chk=on
+      ?`<div class="fzg-chk on"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>`
+      :`<div class="fzg-chk"></div>`;
+    const hint=belegt?`<span style="font-size:10px;color:#555;margin-left:6px;">→ ${belegt}</span>`:'';
+    return `<div class="fzg-row" onclick="toggleFzg(${f.id})" style="${belegt&&!on?'opacity:.5;':''}">${chk}<div><div style="color:#eee;font-size:15px;font-weight:600;">${f.kz}</div><div style="color:#555;font-size:12px;">${f.modell||f.name}</div>${hint}</div></div>`;
   }).join('');
 }
 
